@@ -36,6 +36,7 @@ permissions:
 
 jobs:
   build:
+    needs: scan_code
     runs-on: ubuntu-latest
 
     steps:
