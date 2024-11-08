@@ -20,11 +20,11 @@ namespace BPCalculator
         public const int DiastolicMin = 40;
         public const int DiastolicMax = 100;
 
-        [Display(Name = "systolic pressure")]
+        [Display(Name = "Systolic Pressure")]
         [Range(SystolicMin, SystolicMax, ErrorMessage = "Invalid Systolic Value")]
         public int Systolic { get; set; }                       // mmHG
 
-        [Display(Name = "diastolic pressure")]
+        [Display(Name = "Diastolic Pressure")]
         [Range(DiastolicMin, DiastolicMax, ErrorMessage = "Invalid Diastolic Value")]
         public int Diastolic { get; set; }                      // mmHG
 
