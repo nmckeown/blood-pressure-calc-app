@@ -59,8 +59,8 @@ jobs:
 
       - name: Run UNIT Tests
         run: |
+          dotnet test bpCalcUnitTests/bpCalcUnitTests.csproj --output build --collect "XPlat Code Coverage"
           dotnet tool install -g dotnet-reportgenerator-globaltool
-          dotnet test bpCalcUnitTests/bpCalcUnitTests.csproj --collect "XPlat Code Coverage"
           reportgenerator -reports:"./bpCalcUnitTests/TestReports/*/coverage.cobertura.xml" -targetdir:"./bpCalcUnitTests/coverage-report" -reporttypes:Html
 
       - name: Upload Coverage Report
