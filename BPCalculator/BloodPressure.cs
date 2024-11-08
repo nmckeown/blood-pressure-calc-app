@@ -20,9 +20,11 @@ namespace BPCalculator
         public const int DiastolicMin = 40;
         public const int DiastolicMax = 100;
 
+        [Display(Name = "systolic pressure")]
         [Range(SystolicMin, SystolicMax, ErrorMessage = "Invalid Systolic Value")]
         public int Systolic { get; set; }                       // mmHG
 
+        [Display(Name = "diastolic pressure")]
         [Range(DiastolicMin, DiastolicMax, ErrorMessage = "Invalid Diastolic Value")]
         public int Diastolic { get; set; }                      // mmHG
 
@@ -31,9 +33,19 @@ namespace BPCalculator
         {
             get
             {
-                // implement as part of project
-                //throw new NotImplementedException("not implemented yet");
-                return new BPCategory();                       // replace this
+                if (Systolic >= 140 || Diastolic >= 90) {
+                    return BPCategory.High;
+                }
+                else if (Systolic >= 80 || Diastolic >= 120 ) {
+                    return BPCategory.PreHigh;
+                }
+                else if (Systolic >= 60 || Diastolic >= 90 ) {
+                    return BPCategory.Ideal;
+                } else {
+                    return BPCategory.Low;
+                }
+
+                return new BPCategory();
             }
         }
     }
