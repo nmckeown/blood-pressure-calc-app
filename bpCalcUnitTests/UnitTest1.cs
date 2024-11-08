@@ -1,7 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using BPCalculator;
 
-namespace BPCalculatorUnitTest
+namespace BPCalculatorUnitTests
 {
     [TestClass]
     public class UnitTest1

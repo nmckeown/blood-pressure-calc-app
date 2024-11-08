@@ -59,7 +59,7 @@ jobs:
 
       - name: Run UNIT Tests
         run: |
-          dotnet test bpCalcUnitTests\bpCalcUnitTests.csproj --collect "Code Coverage" -l:trx
+          dotnet test bpCalcUnitTests/bpCalcUnitTests.csproj --collect "Code Coverage" -l:trx
           dotnet tool install -g dotnet-reportgenerator-globaltool
           reportgenerator -reports:"./bpCalcUnitTests/TestReports/*/coverage.cobertura.xml" -targetdir:"./bpCalcUnitTests/coverage-report" -reporttypes:Html
 
