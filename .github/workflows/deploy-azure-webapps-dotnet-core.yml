@@ -57,6 +57,24 @@ jobs:
       - name: Build with dotnet
         run: dotnet build --configuration Release
 
+      - name: Run UNIT Tests
+        run: |
+          dotnet test bpCalcUnitTests\bpCalcUnitTests.csproj --collect "Code Coverage" -l:trx
+          dotnet tool install -g dotnet-reportgenerator-globaltool
+          reportgenerator -reports:"./bpCalcUnitTests/TestReports/*/coverage.cobertura.xml" -targetdir:"./bpCalcUnitTests/coverage-report" -reporttypes:Html
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: code-coverage
+          path: ./bpCalcUnitTests/TestReports/
+
+      - name: Upload Coverage Report HTML
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-html-report
+          path: ./bpCalcUnitTests/coverage-report/
+
       - name: dotnet publish
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
 
