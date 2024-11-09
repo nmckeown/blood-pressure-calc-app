@@ -23,6 +23,7 @@ env:
   AZURE_WEBAPP_NAME: ca1app           # set this to the name of your Azure Web App
   AZURE_WEBAPP_PACKAGE_PATH: '.'      # set this to the path to your web app project, defaults to the repository root
   DOTNET_VERSION: '6'                 # set this to the .NET Core version to use
+  URI: https://ca1app.azurewebsites.net/    
 
 on:
   push:
@@ -129,3 +130,22 @@ jobs:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
+
+  zap_vuln_scan:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Pull Docker image for ZAP
+      run: docker pull zaproxy/zap-weekly
+
+    - name: Run baseline scan
+      run: docker run -v /report:/zap/wrk/:rw --user root -t zaproxy/zap-weekly zap-baseline.py -t ${{env.URI}} -I -r zapreport.html
+  
+    - uses: actions/upload-artifact@v4
+      name: upload ZAP report
+      with:
+        name: ZAPreport
+        path: /report/zapreport.html
+     
