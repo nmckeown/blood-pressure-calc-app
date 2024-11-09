@@ -132,8 +132,8 @@ jobs:
           package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
 
 
-  zap_vuln_scan:
-    name: Zap WebApp Vuln Scan
+  zap_baseline_scan:
+    name: Zap Baseline Scan
     needs: deploy
     runs-on: ubuntu-latest
 
@@ -143,7 +143,7 @@ jobs:
       run: docker pull zaproxy/zap-weekly
 
     - name: Run baseline scan
-      run: docker run -v /report:/zap/wrk/:rw --user root -t zaproxy/zap-weekly zap-baseline.py -t ${{env.URI}} -I -r zapreport.html
+      run: docker run -v /report:/zap/wrk/:rw --user root -t zaproxy/zap-weekly zap-baseline.py -t ${{env.URI}} -I -r zapreport.html -auto
   
     - uses: actions/upload-artifact@v4
       name: upload ZAP report
