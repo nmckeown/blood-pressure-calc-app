@@ -22,11 +22,23 @@ namespace BPCalculator
 
         [Display(Name = "Systolic Pressure")]
         [Range(SystolicMin, SystolicMax, ErrorMessage = "Invalid Systolic Value")]
-        public int Systolic { get; set; }                       // mmHG
+        public int Systolic { // mmHG
+            get; 
+            set{
+                if (value < 0) throw new ArgumentOutOfRangeException(nameof(value), "Systolic pressure cannot be negative.");
+                Systolic = value;
+            }
+        }                       
 
         [Display(Name = "Diastolic Pressure")]
         [Range(DiastolicMin, DiastolicMax, ErrorMessage = "Invalid Diastolic Value")]
-        public int Diastolic { get; set; }                      // mmHG
+        public int Diastolic { // mmHG
+            get; 
+            set{
+                if (value < 0) throw new ArgumentOutOfRangeException(nameof(value), "Diastolic pressure cannot be negative.");
+                Systolic = value;
+            }
+        }    
 
         // calculate BP category
         public BPCategory Category
