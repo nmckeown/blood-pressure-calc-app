@@ -29,7 +29,7 @@ namespace BPCalculator
             set
             {
                 if (value < 0) throw new ArgumentOutOfRangeException(nameof(value), "Systolic pressure cannot be negative.");
-                Systolic = value;
+                systolic = value;
             }
         }                       
 
@@ -40,7 +40,7 @@ namespace BPCalculator
             set
             {
                 if (value < 0) throw new ArgumentOutOfRangeException(nameof(value), "Diastolic pressure cannot be negative.");
-                Systolic = value;
+                diastolic = value;
             }
         }    
 
