@@ -22,56 +22,9 @@ permissions:
   contents: read
 
 jobs:
-  # code analysis for bugs, code smells and vulns
-  scan_code:
-    name: Static Code Analysis
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-            fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-
-      - name: SonarCloud Scan
-        uses: sonarsource/sonarcloud-github-action@master
-        with:
-          projectBaseDir: .
-          args: >
-            -Dsonar.organization=nmckeown
-            -Dsonar.projectKey=nmckeown_blood-pressure-calc-app
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}     
-
-  # scans code depenencies for security vulns
-  owasp_dependency_cjeck:
-    name: OWASP Depenency Check
-    needs: scan_code
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Depcheck
-        uses: dependency-check/Dependency-Check_Action@main
-        id: Depcheck
-        with:
-          project: 'BMI'
-          path: '.'
-          format: 'HTML'    
-          args: >
-            --failOnCVSS 8            
-          # fail if CVSS score (CVE scoring system) is High >=8
-          
-      - name: Upload Test results
-        uses: actions/upload-artifact@v4
-        with:
-           name: Depcheck report
-           path: ${{github.workspace}}/reports
-
   # build source code and run unit tests
   build:
     name: Build & Unit Test
-    needs: owasp_dependency_cjeck
     runs-on: ubuntu-latest
 
     steps:
@@ -120,10 +73,57 @@ jobs:
           name: .net-app
           path: ${{env.DOTNET_ROOT}}/myapp
 
+  # code analysis for bugs, code smells and vulns
+  scan_code:
+    name: Static Code Analysis
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+            fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@master
+        with:
+          projectBaseDir: .
+          args: >
+            -Dsonar.organization=nmckeown
+            -Dsonar.projectKey=nmckeown_blood-pressure-calc-app
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}     
+
+  # scans code depenencies for security vulns
+  owasp_dependency_check:
+    name: OWASP Depenency Check
+    needs: scan_code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Depcheck
+        uses: dependency-check/Dependency-Check_Action@main
+        id: Depcheck
+        with:
+          project: 'BMI'
+          path: '.'
+          format: 'HTML'    
+          args: >
+            --failOnCVSS 8            
+          # fail if CVSS score (CVE scoring system) is High >=8
+          
+      - name: Upload Test results
+        uses: actions/upload-artifact@v4
+        with:
+           name: Depcheck report
+           path: ${{github.workspace}}/reports
+
   # deploy code to webapp service
   deploy:
     name: Deploy BP WebApp
-    needs: build
+    needs: owasp_dependency_check
     permissions:
       contents: none
     runs-on: ubuntu-latest
@@ -147,7 +147,7 @@ jobs:
 
   # baseline app security scan / pen test
   zap_baseline_scan:
-    name: Zap Baseline Scan
+    name: Zap Pen Test
     needs: deploy
     runs-on: ubuntu-latest
 

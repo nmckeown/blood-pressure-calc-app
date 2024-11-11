@@ -8,7 +8,7 @@ namespace BPCalculatorUnitTests
     {
         private BloodPressure bp;
 
-        [SetUp]
+        [TestInitialize]
         public void Setup()
         {
             // Initialize the BloodPressure instance before each test
