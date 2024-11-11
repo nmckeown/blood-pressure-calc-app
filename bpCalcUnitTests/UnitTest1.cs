@@ -98,9 +98,8 @@ namespace BPCalculatorUnitTests
         [TestMethod]
         public void TestInvalidBloodPressureValues()
         {
-            // Arrange
-            Assert.ThrowsException<System.ArgumentOutOfRangeException>(() => bp.Systolic = -1);
-            Assert.ThrowsException<System.ArgumentOutOfRangeException>(() => bp.Diastolic = -1);
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => bp.Systolic = -1);
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => bp.Diastolic = -1);
         }
 
     }
