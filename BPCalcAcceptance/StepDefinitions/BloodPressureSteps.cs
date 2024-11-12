@@ -26,7 +26,7 @@ namespace BPCalculator.Tests.StepDefinitions
         [When(@"I calculate the blood pressure")]
         public void WhenICalculateTheBloodPressure()
         {
-           calculatedCategory = BP.Category();
+           calculatedCategory = BP.Category;
         }
         
         [Then(@"the category should be ""(.*)""")]
