@@ -9,7 +9,7 @@ namespace BPCalculator.Tests.StepDefinitions
     public class BloodPressureSteps
     {
         public BloodPressure BP;
-        private BPCategory calculatedCategory;
+        public BPCategory calculatedCategory;
 
         [Given(@"I have entered a systolic pressure of (.*)")]
         public void GivenIHaveEnteredASystolicPressureOf(int systolic)
