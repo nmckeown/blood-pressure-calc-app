@@ -14,7 +14,7 @@ namespace BPCalculator.Tests.StepDefinitions
         [Given(@"I have entered a systolic pressure of (.*)")]
         public void GivenIHaveEnteredASystolicPressureOf(int systolic)
         {
-            BP.Systolic = systolic;
+            BP = new BloodPressure { Systolic = systolic };
         }
         
         [Given(@"I have entered a diastolic pressure of (.*)")]
