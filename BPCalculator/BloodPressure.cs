@@ -45,7 +45,7 @@ namespace BPCalculator
         }    
 
         // calculate BP category
-        public BPCategory Category()
+        public BPCategory Category
         {
             get
             {
