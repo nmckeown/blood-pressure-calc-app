@@ -10,8 +10,8 @@ Feature: Blood Pressure Category Classification
     Then the category should be "<Category>"
 
     Examples:
-      | Systolic | Diastolic | Category                |
-      | 80       | 50        | Low                     |
-      | 110      | 70        | Ideal blood pressure    |
-      | 130      | 85        | Pre-High blood pressure |
-      | 150      | 95        | High blood pressure     |
+      | Systolic | Diastolic | Category |
+      | 80       | 50        | Low      |
+      | 110      | 70        | Ideal    |
+      | 130      | 85        | PreHigh  |
+      | 150      | 95        | High     |
