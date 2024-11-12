@@ -48,21 +48,24 @@ jobs:
 
       - name: Run UNIT Tests
         run: |
-          dotnet test bpCalcUnitTests/bpCalcUnitTests.csproj --collect "XPlat Code Coverage"
+          dotnet test BPCalcUnit/bpCalcUnitTests.csproj --collect "XPlat Code Coverage" --verbosity normal -l:trx
           dotnet tool install -g dotnet-reportgenerator-globaltool
-          reportgenerator -reports:"./bpCalcUnitTests/TestResults/*/coverage.cobertura.xml" -targetdir:"./bpCalcUnitTests/coverage-report" -reporttypes:Html
+          reportgenerator -reports:"./BPCalcUnit/TestResults/*/coverage.cobertura.xml" -targetdir:"./BPCalcUnit/coverage-report" -reporttypes:Html
+
+      - name: Run Acceptance Tests
+        run: dotnet test BPCalcAcceptance/bpCalcAcceptance.csproj --collect "XPlat Code Coverage" --verbosity normal -l:trx
 
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v4
         with:
           name: code-coverage
-          path: ./bpCalcUnitTests/TestResults/
+          path: ./BPCalcUnit/TestResults/
 
       - name: Upload Coverage Report HTML
         uses: actions/upload-artifact@v4
         with:
           name: coverage-html-report
-          path: ./bpCalcUnitTests/coverage-report/
+          path: ./BPCalcUnit/coverage-report/
 
       - name: dotnet publish
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
