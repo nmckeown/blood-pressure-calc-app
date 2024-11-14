@@ -159,6 +159,8 @@ jobs:
     name: E2E Selenium Tests
     needs: deploy
     runs-on: ubuntu-latest
+
+    steps:
     - name: Run Selenium tests
       run: dotnet test ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp/SeleniumTest.dll /Settings:SeleniumTest.runsettings --logger:"trx;LogFileName=selenium.trx"
   
@@ -175,7 +177,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-
     - name: Pull Docker image for ZAP
       run: docker pull zaproxy/zap-weekly
 
