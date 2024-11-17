@@ -74,13 +74,13 @@ jobs:
           path: ./BPCalcAcceptance/TestResults/
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp' 
+        run: dotnet publish -c Release -o '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}' 
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
-          path: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp'
+          path: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}'
 
   # code analysis for bugs, code smells and vulns
   scan_code:
@@ -152,10 +152,10 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp'
+          package: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}'
 
       - name: Run Selenium tests
-        run: dotnet test  ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp/SeleniumTest.dll /Settings:SeleniumTest.runsettings --logger:"trx;LogFileName=selenium.trx"
+        run: dotnet test  ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/SeleniumTest.dll /Settings:SeleniumTest.runsettings --logger:"trx;LogFileName=selenium.trx"
 
       # Upload results of selenium tests
       - uses: actions/upload-artifact@v4
