@@ -135,7 +135,7 @@ jobs:
     needs: owasp_dependency_check
     permissions:
       contents: none
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     environment:
       name: 'Development'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
