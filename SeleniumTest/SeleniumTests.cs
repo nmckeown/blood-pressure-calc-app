@@ -9,8 +9,9 @@ using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 using System;
 
-namespace BpSeleniumTests.Pages
+namespace SeleniumTest
 {
+    [TestClass]
     public class LandingPage
     {
         private TestContext testContextInstance;
