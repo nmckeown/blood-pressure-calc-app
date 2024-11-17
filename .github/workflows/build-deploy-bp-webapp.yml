@@ -153,22 +153,31 @@ jobs:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
+      - name: Run Selenium tests
+        run: dotnet test ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp/SeleniumTest.dll /Settings:SeleniumTest.runsettings --logger:"trx;LogFileName=selenium.trx"
+
+      # Upload results of selenium tests
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Selenium Tests Results
+          path: TestResults/selenium.trx
   
   # e2e selenium tests
-  e2e_tests:
-    name: E2E Selenium Tests
-    needs: deploy
-    runs-on: ubuntu-latest
+  #e2e_tests:
+  #  name: E2E Selenium Tests
+  #  needs: deploy
+  #  runs-on: ubuntu-latest
 
-    steps:
-    - name: Run Selenium tests
-      run: dotnet test ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp/SeleniumTest.dll /Settings:SeleniumTest.runsettings --logger:"trx;LogFileName=selenium.trx"
+  #  steps:
+  #  - name: Run Selenium tests
+  #    run: dotnet test ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp/SeleniumTest.dll /Settings:SeleniumTest.runsettings --logger:"trx;LogFileName=selenium.trx"
   
     # Upload results of selenium tests
-    - uses: actions/upload-artifact@v4
-      with:
-        name: Selenium Tests Results
-        path: TestResults/selenium.trx
+  #  - uses: actions/upload-artifact@v4
+  #    with:
+  #      name: Selenium Tests Results
+  #      path: TestResults/selenium.trx
 
   # baseline app security scan / pen test
   zap_baseline_scan:
