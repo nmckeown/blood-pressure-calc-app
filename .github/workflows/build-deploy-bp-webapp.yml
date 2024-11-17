@@ -74,13 +74,13 @@ jobs:
           path: ./BPCalcAcceptance/TestResults/
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+        run: dotnet publish -c Release -o '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp' 
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
-          path: ${{env.DOTNET_ROOT}}/myapp
+          path: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp'
 
   # code analysis for bugs, code smells and vulns
   scan_code:
