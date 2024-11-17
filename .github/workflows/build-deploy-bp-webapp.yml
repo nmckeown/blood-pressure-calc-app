@@ -182,7 +182,7 @@ jobs:
   # baseline app security scan / pen test
   zap_baseline_scan:
     name: Zap Pen Test
-    needs: e2e_tests
+    needs: deploy
     runs-on: ubuntu-latest
 
     steps:
