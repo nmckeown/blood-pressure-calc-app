@@ -73,6 +73,9 @@ jobs:
           name: bdd-coverage
           path: ./BPCalcAcceptance/TestResults/
 
+      - name: Check Env
+        run: echo "DOTNET_ROOT="$DOTNET_ROOT
+
       - name: dotnet publish
         run: dotnet publish -c Release -o ${{ env.DOTNET_ROOT }}/myapp
 
@@ -152,10 +155,10 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+          package: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp'
 
       - name: Run Selenium Tests
-        run: dotnet test  ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}SeleniumTest.dll /Settings:SeleniumTest.runsettings --logger:"trx;LogFileName=selenium.trx"
+        run: dotnet test  ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp/SeleniumTest.dll /Settings:SeleniumTest.runsettings --logger:"trx;LogFileName=selenium.trx"
 
       # Upload results of selenium tests
       - uses: actions/upload-artifact@v4
