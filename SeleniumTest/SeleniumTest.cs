@@ -66,7 +66,7 @@ namespace SeleniumTest
                 BPCalcButton.Click();
 
                 var bpCalc = driver.FindElement(By.Id("Category")).Text.toString();
-                Assert.Contains("Low", result)
+                Assert.Contains("Low", result);
 
                 // submit the form
                 //driver.FindElement(By.Id("form1")).Submit();
