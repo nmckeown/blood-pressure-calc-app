@@ -30,9 +30,9 @@ namespace SeleniumTest
         public void Setup()
         {
             // read URL from SeleniumTest.runsettings (configure run settings)
-            this.webAppUri = testContextInstance.Properties["webAppUri"].ToString();
+            //this.webAppUri = testContextInstance.Properties["webAppUri"].ToString();
             
-            //this.webAppUri = "https://ca1app.azurewebsites.net/";
+            this.webAppUri = "https://ca1app.azurewebsites.net/";
         }
 
         [TestMethod]
