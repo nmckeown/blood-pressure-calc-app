@@ -65,8 +65,15 @@ namespace SeleniumTest
                 // calculate
                 BPCalcButton.Click();
 
-                var bpCalc = driver.FindElement(By.Id("Category")).Text.toString();
-                Assert.Contains("Low", result);
+                IWebElement BPCalc = new WebDriverWait(driver, TimeSpan.FromSeconds(2))
+                    .Until(c => c.FindElement(By.Id("Category")));
+
+                string bpval = BPCalc.Text.ToString();
+                StringAssert.Contains("Low", bpval);
+                //Assert.Contains("Low", bpval);
+
+                //var bpCalc = driver.FindElement(By.Id("Category")).Text.toString();
+                //Assert.Contains("Low", result);
 
                 // submit the form
                 //driver.FindElement(By.Id("form1")).Submit();
@@ -80,7 +87,7 @@ namespace SeleniumTest
 
                 //StringAssert.EndsWith(bmi, "24.96");
 
-                //driver.Quit();
+                driver.Quit();
 
 
             }
