@@ -135,7 +135,7 @@ jobs:
     needs: owasp_dependency_check
     permissions:
       contents: none
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     environment:
       name: 'Development'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
@@ -154,8 +154,8 @@ jobs:
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}'
 
-      #- name: Run Selenium tests
-      #  run: dotnet test  ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/SeleniumTest.dll /Settings:SeleniumTest.runsettings --logger:"trx;LogFileName=selenium.trx"
+      - name: Run Selenium tests
+        run: dotnet test  ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/SeleniumTest.dll /Settings:SeleniumTest.runsettings --logger:"trx;LogFileName=selenium.trx"
 
       # Upload results of selenium tests
       - uses: actions/upload-artifact@v4
