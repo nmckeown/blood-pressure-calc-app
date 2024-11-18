@@ -50,7 +50,7 @@ namespace SeleniumTest
 
                 // navigate to URI for temperature converter
                 // web app running on IIS express
-                driver.Navigate().GoToUrl(webAppUri)
+                driver.Navigate().GoToUrl(webAppUri);
 
                 // get input values and submit button
                 IWebElement BPSystolicElement = driver.FindElement(By.Id("BP_Systolic"));
