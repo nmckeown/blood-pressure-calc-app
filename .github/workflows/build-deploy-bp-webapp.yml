@@ -74,7 +74,7 @@ jobs:
           path: ./BPCalcAcceptance/TestResults/
 
       - name: Check Env
-        run: echo "DOTNET_ROOT="$DOTNET_ROOT
+        run: echo "DOTNET_ROOT="${{ env.DOTNET_ROOT }}
 
       - name: dotnet publish
         run: dotnet publish -c Release -o ${{ env.DOTNET_ROOT }}/myapp
@@ -156,6 +156,12 @@ jobs:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}'
+
+      - name: debug
+        run: |
+          echo "AZURE_WEBAPP_PACKAGE_PATH="${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+          pwd
+          ls -latR
 
       - name: Run Selenium Tests
         run: dotnet test  ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/net-app/SeleniumTest.dll /Settings:SeleniumTest.runsettings --logger:"trx;LogFileName=selenium.trx"
