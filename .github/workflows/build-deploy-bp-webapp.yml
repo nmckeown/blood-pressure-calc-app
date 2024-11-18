@@ -7,7 +7,7 @@ name: Build and deploy BP Calculator ASP.Net Core app to an Azure Web App
 
 env:
   AZURE_WEBAPP_NAME: ca1app             # set this to the name of your Azure Web App
-  AZURE_WEBAPP_PACKAGE_PATH: 'publish'  # set this to the path to your web app project, defaults to the repository root
+  AZURE_WEBAPP_PACKAGE_PATH: '.'  # set this to the path to your web app project, defaults to the repository root
   DOTNET_VERSION: '6'                   # set this to the .NET Core version to use
   URI: https://ca1app.azurewebsites.net/    
 
@@ -74,13 +74,13 @@ jobs:
           path: ./BPCalcAcceptance/TestResults/
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp'
+        run: dotnet publish -c Release -o ${{ env.DOTNET_ROOT }}/myapp
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
-          name: .web-app
-          path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp
+          name: .net-app
+          path: ${{env.DOTNET_ROOT}}/myapp
 
   # code analysis for bugs, code smells and vulns
   scan_code:
@@ -144,7 +144,7 @@ jobs:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
-          name: .web-app
+          name: .net-app
 
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
@@ -152,7 +152,7 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}'
+          package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
 
       - name: Run Selenium Tests
         run: dotnet test  ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/SeleniumTest.dll /Settings:SeleniumTest.runsettings --logger:"trx;LogFileName=selenium.trx"
