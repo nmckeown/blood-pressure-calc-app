@@ -66,7 +66,7 @@ namespace SeleniumTest
                 BPCalcButton.Click();
 
                 IWebElement BPCalc = new WebDriverWait(driver, TimeSpan.FromSeconds(2))
-                    .Until(c => c.FindElement(By.Id("Category")));
+                    .Until(c => c.FindElement(By.Id("BP_Category")));
 
                 string bpval = BPCalc.Text.ToString();
                 StringAssert.Contains("Low", bpval);
