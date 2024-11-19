@@ -111,4 +111,4 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: Selenium Tests Results
-          path: TestResults/selenium.trx
+          path: TestResults/selenium.html
