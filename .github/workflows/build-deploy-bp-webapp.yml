@@ -140,7 +140,7 @@ jobs:
       contents: none
     runs-on: windows-latest
     environment:
-      name: 'Development'
+      name: 'Staging'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
