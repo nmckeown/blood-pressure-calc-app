@@ -22,6 +22,36 @@ permissions:
   contents: read
 
 jobs:
+  provision_staging:
+    name: Provision Staging Infra
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout code
+      - uses: actions/checkout@main
+
+      # Log into Azure
+      - uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - run: |
+        az webapp list --query "[?state=='Running']"
+
+      
+      # Deploy ARM template
+      #- name: Run ARM deploy
+      #  uses: azure/arm-deploy@v1
+      #  with:
+      #    subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
+      #    resourceGroupName: ${{ secrets.AZURE_RG }}
+      #    template: ../IaC/staging/template.json
+      #    parameters: storageAccountType=Standard_LRS
+
+      # output containerName variable from template
+      #- run: echo ${{ steps.deploy.outputs.containerName }}
+
+
   # build source code and run unit tests
   build:
     name: Build & Test
