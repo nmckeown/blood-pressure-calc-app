@@ -35,18 +35,18 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }} # JSON objects which represents service principal
 
-      - run: |
-          az webapp list --query "[?state=='Running']"
+      #- run: |
+      #    az webapp list --query "[?state=='Running']"
 
       
       # Deploy ARM template
-      #- name: Run ARM deploy
-      #  uses: azure/arm-deploy@v1
-      #  with:
-      #    subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
-      #    resourceGroupName: ${{ secrets.AZURE_RG }}
-      #    template: ../IaC/staging/template.json
-      #    parameters: storageAccountType=Standard_LRS
+      - name: Run ARM deploy
+        uses: azure/arm-deploy@v1
+        with:
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
+          resourceGroupName: ${{ secrets.AZURE_RG }}
+          template: ../IaC/template.json
+          parameters: ../IaC/staging.parameter.json
 
       # output containerName variable from template
-      #- run: echo ${{ steps.deploy.outputs.containerName }}
+      - run: echo ${{ steps.deploy.outputs.containerName }}
