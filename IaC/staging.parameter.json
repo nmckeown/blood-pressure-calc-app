@@ -1,0 +1,12 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "sites_ca1app_name": {
+            "value": "staging_ca1app"
+        },
+        "serverfarms_ca1plan_externalid": {
+            "value": "/subscriptions/9ec68712-3805-4cf9-a4c1-4e5951df302b/resourceGroups/ca1rg/providers/Microsoft.Web/serverfarms/ca1plan"
+        }
+    }
+}
