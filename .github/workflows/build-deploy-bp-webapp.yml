@@ -6,8 +6,9 @@
 name: Build and deploy BP Calculator ASP.Net Core app to an Azure Web App
 
 env:
-  AZURE_WEBAPP_NAME: ca1app             # set this to the name of your Azure Web App
-  AZURE_WEBAPP_PACKAGE_PATH: 'publish'  # set this to the path to your web app project, defaults to the repository root
+  AZURE_PROD_WEBAPP_NAME: prod-ca1app             # prod webapp
+  AZURE_STAGING_WEBAPP_NAME: staging-ca1app             # staging webapp
+  AZURE_WEBAPP_PACKAGE_PATH: '.'  # set this to the path to your web app project, defaults to the repository root
   DOTNET_VERSION: '6'                   # set this to the .NET Core version to use
   URI: https://ca1app.azurewebsites.net/    
 
@@ -22,8 +23,120 @@ permissions:
   contents: read
 
 jobs:
+  # build source code and run unit tests
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4   
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Set up dependency caching for faster builds
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Build with dotnet
+        run: dotnet build --configuration Release
+
+      - name: Run UNIT Tests
+        run: |
+          dotnet test BPCalcUnit/BPCalcUnitTests.csproj --collect "XPlat Code Coverage"
+          dotnet tool install -g dotnet-reportgenerator-globaltool
+          reportgenerator -reports:"./BPCalcUnit/TestResults/*/coverage.cobertura.xml" -targetdir:"./BPCalcUnit/coverage-report" -reporttypes:Html
+
+      - name: Run Acceptance Tests
+        run: dotnet test BPCalcAcceptance/BPCalcAcceptance.csproj --collect "Code Coverage"
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage
+          path: ./BPCalcUnit/TestResults/
+
+      - name: Upload Coverage Report HTML
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-html-report
+          path: ./BPCalcUnit/coverage-report/
+
+      - name: Upload BDD Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: bdd-coverage
+          path: ./BPCalcAcceptance/TestResults/
+
+      - name: Check Env
+        run: echo "DOTNET_ROOT="${{ env.DOTNET_ROOT }}
+
+      - name: dotnet publish
+        run: dotnet publish -c Release -o '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp'
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: .net-app
+          path: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp'
+
+  # code analysis for bugs, code smells and vulns
+  scan_code:
+    name: Static Code Analysis
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+            fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@master
+        with:
+          projectBaseDir: .
+          args: >
+            -Dsonar.organization=nmckeown
+            -Dsonar.projectKey=nmckeown_blood-pressure-calc-app
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}     
+
+  # scans code depenencies for security vulns
+  owasp_dependency_check:
+    name: OWASP Depenency Check
+    needs: scan_code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Depcheck
+        uses: dependency-check/Dependency-Check_Action@main
+        id: Depcheck
+        with:
+          project: 'BMI'
+          path: '.'
+          format: 'HTML'    
+          args: >
+            --failOnCVSS 8            
+          # fail if CVSS score (CVE scoring system) is High >=8
+          
+      - name: Upload Test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: Depcheck report
+          path: ${{github.workspace}}/reports
+
+  # provision staging environment
   provision_staging:
     name: Provision Staging Infra
+    needs: owasp_dependency_check
     runs-on: ubuntu-latest
 
     steps:
@@ -35,12 +148,8 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }} # JSON objects which represents service principal
 
-      #- run: |
-      #    az webapp list --query "[?state=='Running']"
-
-      
       # Deploy ARM template
-      - name: Run ARM deploy
+      - name: Provision Staging
         uses: azure/arm-deploy@v1
         with:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
@@ -48,5 +157,78 @@ jobs:
           template: ./IaC/template.json
           parameters: ./IaC/staging.parameter.json
 
-      # output containerName variable from template
-      - run: echo ${{ steps.deploy.outputs.containerName }}
+  # deploy code to webapp service
+  deploy_staging:
+    name: Deploy BP Staging WebApp
+    needs: provision_staging
+    permissions:
+      contents: none
+    runs-on: windows-latest
+    environment:
+      name: 'Staging'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: dotnet publish
+        run: dotnet publish -c Release -o '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp'
+
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_STAGING_WEBAPP_NAME }}
+          #startup-command: "dotnet BPCalculator.dll"
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
+      - name: Run Selenium Tests
+        run: |
+          pwd
+          dotnet test ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp/SeleniumTest.dll /Settings:SeleniumTest.runsettings --logger:"html;LogFileName=selenium.html"
+
+      # Upload results of selenium tests
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Selenium Tests Results
+          path: TestResults/selenium.html
+
+  # baseline app security scan / pen test
+  zap_baseline_scan:
+    name: Zap Pen Test
+    needs: deploy_staging
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Pull Docker image for ZAP
+      run: docker pull zaproxy/zap-weekly
+
+    - name: Run baseline scan
+      run: docker run -v /report:/zap/wrk/:rw --user root -t zaproxy/zap-weekly zap-baseline.py -t ${{env.URI}} -I -r zapreport.html
+  
+    - uses: actions/upload-artifact@v4
+      name: upload ZAP report
+      with:
+        name: ZAPreport
+        path: /report/zapreport.html
+
+  # performance / load testing
+  k6_load_test:
+    name: K6 Perf Testing
+    needs: zap_baseline_scan
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Pull Docker image for k6
+      run: docker pull grafana/k6
+
+    - name: Run k6 load test, capture report
+      run: docker run -i grafana/k6 run - <k6tests/perf2.js > k6report.txt
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: k6report
+        path: k6report.txt
