@@ -8,7 +8,7 @@ name: Build and deploy BP Calculator ASP.Net Core app to an Azure Web App
 env:
   AZURE_PROD_WEBAPP_NAME: prod-ca1app             # prod webapp
   AZURE_STAGING_WEBAPP_NAME: staging-ca1app             # staging webapp
-  AZURE_WEBAPP_PACKAGE_PATH: '.'  # set this to the path to your web app project, defaults to the repository root
+  AZURE_WEBAPP_PACKAGE_PATH: 'publish'  # set this to the path to your web app project, defaults to the repository root
   DOTNET_VERSION: '6'                   # set this to the .NET Core version to use
   URI: https://ca1app.azurewebsites.net/    
 
@@ -23,6 +23,30 @@ permissions:
   contents: read
 
 jobs:
+  # provision staging environment
+  provision_staging:
+    name: Provision Staging Infra
+    #needs: owasp_dependency_check
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout code
+      - uses: actions/checkout@main
+
+      # Log into Azure
+      - uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }} # JSON objects which represents service principal
+
+      # Deploy ARM template
+      - name: Provision Staging
+        uses: azure/arm-deploy@v1
+        with:
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
+          resourceGroupName: ${{ secrets.AZURE_RG }}
+          template: ./IaC/template.json
+          parameters: ./IaC/staging.parameter.json
+
   # build source code and run unit tests
   build:
     name: Build & Test
@@ -133,34 +157,10 @@ jobs:
           name: Depcheck report
           path: ${{github.workspace}}/reports
 
-  # provision staging environment
-  provision_staging:
-    name: Provision Staging Infra
-    needs: owasp_dependency_check
-    runs-on: ubuntu-latest
-
-    steps:
-      # Checkout code
-      - uses: actions/checkout@main
-
-      # Log into Azure
-      - uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }} # JSON objects which represents service principal
-
-      # Deploy ARM template
-      - name: Provision Staging
-        uses: azure/arm-deploy@v1
-        with:
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
-          resourceGroupName: ${{ secrets.AZURE_RG }}
-          template: ./IaC/template.json
-          parameters: ./IaC/staging.parameter.json
-
   # deploy code to webapp service
   deploy_staging:
-    name: Deploy BP Staging WebApp
-    needs: provision_staging
+    name: Deploy Staging & E2E
+    needs: owasp_dependency_check
     permissions:
       contents: none
     runs-on: windows-latest
@@ -171,17 +171,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: dotnet publish
-        run: dotnet publish -c Release -o '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp'
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: .net-app
 
-      - name: Deploy to Azure Web App
+      - name: Deploy to Staging Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.AZURE_STAGING_WEBAPP_NAME }}
           #startup-command: "dotnet BPCalculator.dll"
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+          publish-profile: ${{ secrets.AZURE_STAGING_WEBAPP_PUBLISH_PROFILE }}
+          package: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp'
 
       - name: Run Selenium Tests
         run: |
