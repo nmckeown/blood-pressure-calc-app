@@ -56,7 +56,7 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Set up dependency caching for faster builds
+      - name: Set Up Dependency Caching
         uses: actions/cache@v4
         with:
           path: ~/.nuget/packages
@@ -94,7 +94,7 @@ jobs:
           name: bdd-coverage
           path: ./BPCalcAcceptance/TestResults/
 
-      - name: dotnet publish
+      - name: dotnet Publish
         run: dotnet publish -c Release -o '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp'
 
       - name: Upload artifact for deployment job
@@ -121,10 +121,14 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: .net-app
+
       # Log into Azure
       - uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Get Publish publish
+        run: az webapp deployment list-publishing-credentials --name staging-ca1app --resource-group ca1rg --subscription 9ec68712-3805-4cf9-a4c1-4e5951df302b Tee-Object -Variable PublishProfile
 
       - name: Deploy to Staging Web App
         id: deploy-to-webapp
@@ -132,13 +136,11 @@ jobs:
         with:
           app-name: ${{ env.AZURE_STAGING_WEBAPP_NAME }}
           #startup-command: "dotnet BPCalculator.dll"
-          publish-profile: ${{ az webapp deployment list-publishing-credentials --name staging-ca1app --resource-group ca1rg --subscription 9ec68712-3805-4cf9-a4c1-4e5951df302b }}
+          publish-profile: $PublishProfile
           package: .
 
       - name: Run Selenium Tests
-        run: |
-          pwd
-          dotnet test SeleniumTest.dll /Settings:SeleniumTest.runsettings --logger:"html;LogFileName=selenium.html"
+        run: dotnet test SeleniumTest.dll /Settings:SeleniumTest.runsettings --logger:"html;LogFileName=selenium.html"
 
       # Upload results of selenium tests
       - uses: actions/upload-artifact@v4
