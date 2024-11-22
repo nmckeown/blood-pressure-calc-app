@@ -46,6 +46,7 @@ jobs:
   build:
     name: Build & Test
     runs-on: windows-latest
+    needs: provision_staging
 
     steps:
       - uses: actions/checkout@v4   
@@ -142,7 +143,7 @@ jobs:
           path: TestResults/selenium.html
 
   delete_staging:
-    name: Teardown staging
+    name: Teardown Staging
     needs: deploy_staging
     runs-on: ubuntu-latest
 
