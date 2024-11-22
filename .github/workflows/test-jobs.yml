@@ -1,0 +1,121 @@
+name: Test Jobs
+
+env:
+  AZURE_WEBAPP_NAME: ca1app
+  AZURE_PROD_WEBAPP_NAME: prod-ca1app             # prod webapp
+  AZURE_STAGING_WEBAPP_NAME: staging-ca1app             # staging webapp
+  AZURE_WEBAPP_PACKAGE_PATH: 'publish'  # set this to the path to your web app project, defaults to the repository root
+  DOTNET_VERSION: '6'                   # set this to the .NET Core version to use
+  URI: https://ca1app.azurewebsites.net/    
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4   
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Set up dependency caching for faster builds
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Build with dotnet
+        run: dotnet build --configuration Release
+
+      - name: Run UNIT Tests
+        run: |
+          dotnet test BPCalcUnit/BPCalcUnitTests.csproj --collect "XPlat Code Coverage"
+          dotnet tool install -g dotnet-reportgenerator-globaltool
+          reportgenerator -reports:"./BPCalcUnit/TestResults/*/coverage.cobertura.xml" -targetdir:"./BPCalcUnit/coverage-report" -reporttypes:Html
+
+      - name: Run Acceptance Tests
+        run: dotnet test BPCalcAcceptance/BPCalcAcceptance.csproj --collect "Code Coverage"
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage
+          path: ./BPCalcUnit/TestResults/
+
+      - name: Upload Coverage Report HTML
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-html-report
+          path: ./BPCalcUnit/coverage-report/
+
+      - name: Upload BDD Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: bdd-coverage
+          path: ./BPCalcAcceptance/TestResults/
+
+      - name: Check Env
+        run: echo "DOTNET_ROOT="${{ env.DOTNET_ROOT }}
+
+      - name: dotnet publish
+        run: dotnet publish -c Release -o '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp'
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: .net-app
+          path: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp'
+
+  # deploy code to webapp service
+  deploy_staging:
+    name: Deploy Staging & E2E
+    needs: build
+    permissions:
+      contents: none
+    runs-on: windows-latest
+    environment:
+      name: 'Staging'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: .net-app
+
+      - name: Deploy to Staging Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          #startup-command: "dotnet BPCalculator.dll"
+          publish-profile: ${{ secrets.AZURE_STAGING_WEBAPP_PUBLISH_PROFILE }}
+          package: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp'
+
+      - name: Run Selenium Tests
+        run: |
+          pwd
+          dotnet test ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp/SeleniumTest.dll /Settings:SeleniumTest.runsettings --logger:"html;LogFileName=selenium.html"
+
+      # Upload results of selenium tests
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Selenium Tests Results
+          path: TestResults/selenium.html
