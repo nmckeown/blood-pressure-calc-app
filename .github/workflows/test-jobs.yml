@@ -36,7 +36,7 @@ jobs:
 
       # Deploy ARM template
       - name: Provision Staging
-        uses: azure/arm-deploy@v1
+        uses: azure/arm-deploy@v2
         with:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
           resourceGroupName: ${{ secrets.AZURE_RG }}
@@ -114,13 +114,17 @@ jobs:
       name: 'Staging'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
-    steps:
+    steps:    
       - uses: actions/checkout@v4
 
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: .net-app
+      # Log into Azure
+      - uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Deploy to Staging Web App
         id: deploy-to-webapp
@@ -128,7 +132,7 @@ jobs:
         with:
           app-name: ${{ env.AZURE_STAGING_WEBAPP_NAME }}
           #startup-command: "dotnet BPCalculator.dll"
-          publish-profile: ${{ secrets.AZURE_STAGING_WEBAPP_PUBLISH_PROFILE }}
+          publish-profile: ${{ az webapp deployment list-publishing-credentials --name staging-ca1app --resource-group ca1rg --subscription 9ec68712-3805-4cf9-a4c1-4e5951df302b }}
           package: .
 
       - name: Run Selenium Tests

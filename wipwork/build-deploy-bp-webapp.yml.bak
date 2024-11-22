@@ -129,8 +129,8 @@ jobs:
       - name: Upload Test results
         uses: actions/upload-artifact@v4
         with:
-           name: Depcheck report
-           path: ${{github.workspace}}/reports
+          name: Depcheck report
+          path: ${{github.workspace}}/reports
 
   # deploy code to webapp service
   deploy:
