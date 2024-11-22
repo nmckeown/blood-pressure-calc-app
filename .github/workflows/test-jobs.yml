@@ -19,6 +19,30 @@ permissions:
   contents: read
 
 jobs:
+  # provision staging environment
+  provision_staging:
+    name: Provision Staging Infra
+    #needs: owasp_dependency_check
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout code
+      - uses: actions/checkout@main
+
+      # Log into Azure
+      - uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # Deploy ARM template
+      - name: Provision Staging
+        uses: azure/arm-deploy@v1
+        with:
+          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
+          resourceGroupName: ${{ secrets.AZURE_RG }}
+          template: ./IaC/template.json
+          parameters: ./IaC/staging.parameter.json
+
   build:
     name: Build & Test
     runs-on: windows-latest
@@ -69,9 +93,6 @@ jobs:
           name: bdd-coverage
           path: ./BPCalcAcceptance/TestResults/
 
-      - name: Check Env
-        run: echo "DOTNET_ROOT="${{ env.DOTNET_ROOT }}
-
       - name: dotnet publish
         run: dotnet publish -c Release -o '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp'
 
@@ -109,18 +130,27 @@ jobs:
           publish-profile: ${{ secrets.AZURE_STAGING_WEBAPP_PUBLISH_PROFILE }}
           package: .
 
-      - name: Startup App
-        run: dotnet BPCalculator.dll
-
       - name: Run Selenium Tests
         run: |
           pwd
           dotnet test SeleniumTest.dll /Settings:SeleniumTest.runsettings --logger:"html;LogFileName=selenium.html"
-
-
 
       # Upload results of selenium tests
       - uses: actions/upload-artifact@v4
         with:
           name: Selenium Tests Results
           path: TestResults/selenium.html
+
+  delete_staging:
+    name: Teardown staging
+    needs: deploy_staging
+    runs-on: ubuntu-latest
+
+    steps:
+      # Log into Azure
+      - uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Delete Staging WebApp
+        run: az webapp delete --name staging-ca1app --resource-group ca1rg
