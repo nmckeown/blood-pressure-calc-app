@@ -41,8 +41,8 @@ jobs:
         with:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
           resourceGroupName: ${{ secrets.AZURE_RG }}
-          template: ./IaC/template.json
-          parameters: ./IaC/staging.parameter.json
+          template: ./IaC/webapp.template.json
+          parameters: sites_ca1app_name=${{ env.AZURE_STAGING_WEBAPP_NAME }}
 
   build:
     name: Build & Test
@@ -137,7 +137,7 @@ jobs:
         with:
           app-name: ${{ env.AZURE_STAGING_WEBAPP_NAME }}
           #startup-command: "dotnet BPCalculator.dll"
-          publish-profile: $PublishProfile
+          publish-profile: ${{ $PublishProfile }}
           package: .
 
       - name: Run Selenium Tests
