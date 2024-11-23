@@ -6,10 +6,12 @@
 name: Build and deploy BP Calculator ASP.Net Core app to an Azure Web App
 
 env:
-  AZURE_PROD_WEBAPP_NAME: prod-ca1app             # prod webapp
-  AZURE_STAGING_WEBAPP_NAME: staging1-ca1app             # staging webapp
-  AZURE_WEBAPP_PACKAGE_PATH: 'publish'  # set this to the path to your web app project, defaults to the repository root
-  DOTNET_VERSION: '6'                   # set this to the .NET Core version to use
+  AZURE_PROD_WEBAPP_NAME: prod-ca1app               # prod webapp
+  AZURE_STAGING_WEBAPP_NAME: staging1-ca1app        # staging webapp
+  AZURE_RESOURCE_GROUP: ca1rg
+  AZURE_SUB: 9ec68712-3805-4cf9-a4c1-4e5951df302b
+  AZURE_WEBAPP_PACKAGE_PATH: 'publish'              # set this to the path to your web app project, defaults to the repository root
+  DOTNET_VERSION: '6'                               # set this to the .NET Core version to use
   URI: https://ca1app.azurewebsites.net/    
 
 on:

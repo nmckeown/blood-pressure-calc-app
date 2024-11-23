@@ -1,11 +1,12 @@
 name: Test Jobs
 
 env:
-  AZURE_WEBAPP_NAME: ca1app
-  AZURE_PROD_WEBAPP_NAME: prod-ca1app             # prod webapp
-  AZURE_STAGING_WEBAPP_NAME: staging-ca1app             # staging webapp
-  AZURE_WEBAPP_PACKAGE_PATH: 'publish'  # set this to the path to your web app project, defaults to the repository root
-  DOTNET_VERSION: '6'                   # set this to the .NET Core version to use
+  AZURE_PROD_WEBAPP_NAME: prod-ca1app               # prod webapp
+  AZURE_STAGING_WEBAPP_NAME: staging1-ca1app        # staging webapp
+  AZURE_RESOURCE_GROUP: ca1rg
+  AZURE_SUB: 9ec68712-3805-4cf9-a4c1-4e5951df302b
+  AZURE_WEBAPP_PACKAGE_PATH: 'publish'              # set this to the path to your web app project, defaults to the repository root
+  DOTNET_VERSION: '6'                               # set this to the .NET Core version to use
   URI: https://ca1app.azurewebsites.net/    
 
 on:
@@ -128,7 +129,7 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Get Publish Profile
-        run: az webapp deployment list-publishing-credentials --name staging-ca1app --resource-group ca1rg --subscription 9ec68712-3805-4cf9-a4c1-4e5951df302b | Tee-Object -Variable PublishProfile
+        run: az webapp deployment list-publishing-credentials --name ${{env.AZURE_STAGING_WEBAPP_NAME}} --resource-group ${{env.AZURE_RESOURCE_GROUP}} --subscription ${{env.AZURE_SUB}} | Tee-Object -Variable PublishProfile
 
       - name: Deploy to Staging Web App
         id: deploy-to-webapp
