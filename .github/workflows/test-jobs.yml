@@ -113,7 +113,8 @@ jobs:
   deploy_staging:
     name: Deploy Staging & E2E
     needs: build
-    permissions: write-all
+    permissions:
+      contents: none
     runs-on: windows-latest
     environment:
       name: 'Staging'
@@ -163,6 +164,8 @@ jobs:
     name: Teardown Staging
     needs: deploy_staging
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
 
     steps:
       # Log into Azure
@@ -171,6 +174,7 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - uses: trstringer/manual-approval@v1
+        timeout-minutes: 10
         with:
           secret: ${{ github.TOKEN }}
           approvers: nmckeown
