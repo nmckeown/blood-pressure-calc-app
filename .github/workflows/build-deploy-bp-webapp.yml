@@ -15,8 +15,8 @@ env:
   URI: https://ca1app.azurewebsites.net/    
 
 on:
-  push:
-    branches: [ "main" ]
+  #push:
+  #  branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
   workflow_dispatch:
