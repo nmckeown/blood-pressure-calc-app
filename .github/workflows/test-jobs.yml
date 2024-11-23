@@ -98,7 +98,7 @@ jobs:
       - name: dotnet Publish
         run: dotnet publish -c Release -o '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp'
 
-      - name: Upload artifact for deployment job
+      - name: Upload artifact for Deployment Job
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
@@ -118,7 +118,7 @@ jobs:
     steps:    
       - uses: actions/checkout@v4
 
-      - name: Download artifact from build job
+      - name: Download Artifact From Build Job
         uses: actions/download-artifact@v4
         with:
           name: .net-app
@@ -133,7 +133,7 @@ jobs:
           az webapp deployment list-publishing-credentials --name ${{env.AZURE_STAGING_WEBAPP_NAME}} --resource-group ${{env.AZURE_RESOURCE_GROUP}} --subscription ${{env.AZURE_SUB}} | Tee-Object -Variable PublishProfile
           echo $PublishProfile >> $GITHUB_ENV
 
-      - name: Deploy to Staging Web App
+      - name: Deploy to Staging WebApp
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
@@ -161,6 +161,17 @@ jobs:
       - uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - uses: trstringer/manual-approval@v1
+        with:
+          secret: ${{ github.TOKEN }}
+          approvers: nmckeown
+          minimum-approvals: 1
+          issue-title: "Destroy Staging Env"
+          issue-body: "Please approve or deny"
+          exclude-workflow-initiator-as-approver: false
+          additional-approved-words: ''
+          additional-denied-words: ''
 
       - name: Delete Staging WebApp
         run: az webapp delete --name ${{env.AZURE_STAGING_WEBAPP_NAME}} --resource-group ${{env.AZURE_RESOURCE_GROUP}}
