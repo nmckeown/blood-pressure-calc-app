@@ -7,7 +7,7 @@ name: Build and deploy BP Calculator ASP.Net Core app to an Azure Web App
 
 env:
   AZURE_PROD_WEBAPP_NAME: prod-ca1app               # prod webapp
-  AZURE_STAGING_WEBAPP_NAME: staging1-ca1app        # staging webapp
+  AZURE_STAGING_WEBAPP_NAME: staging-ca1app        # staging webapp
   AZURE_RESOURCE_GROUP: ca1rg
   AZURE_SUB: 9ec68712-3805-4cf9-a4c1-4e5951df302b
   AZURE_WEBAPP_PACKAGE_PATH: 'publish'              # set this to the path to your web app project, defaults to the repository root
@@ -25,30 +25,6 @@ permissions:
   contents: read
 
 jobs:
-  # provision staging environment
-  provision_staging:
-    name: Provision Staging Infra
-    #needs: owasp_dependency_check
-    runs-on: ubuntu-latest
-
-    steps:
-      # Checkout code
-      - uses: actions/checkout@main
-
-      # Log into Azure
-      - uses: azure/login@v2
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }} # JSON objects which represents service principal
-
-      # Deploy ARM template
-      - name: Provision Staging
-        uses: azure/arm-deploy@v1
-        with:
-          subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
-          resourceGroupName: ${{ secrets.AZURE_RG }}
-          template: ./IaC/template.json
-          parameters: ./IaC/staging.parameter.json
-
   # build source code and run unit tests
   build:
     name: Build & Test
