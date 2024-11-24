@@ -91,7 +91,7 @@ jobs:
     name: Build & Test
     if: true
     runs-on: windows-latest
-    needs: provision_staging
+    #needs: provision_staging
 
     steps:
       - uses: actions/checkout@v4   
