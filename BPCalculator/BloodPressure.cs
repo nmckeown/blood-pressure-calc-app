@@ -12,6 +12,14 @@ namespace BPCalculator
         [Display(Name="Pre-High Blood Pressure")] PreHigh,
         [Display(Name ="High Blood Pressure")]  High
     };
+    
+    // Pulse Pressure categories
+    public enum PPCategory
+    {
+        [Display(Name="Low Pulse Pressure")] Low,
+        [Display(Name="Normal Pulse Pressure")]  Normal,
+        [Display(Name="High Pulse Pressure")] High
+    };
 
     public class BloodPressure
     {
@@ -60,6 +68,23 @@ namespace BPCalculator
                 } 
                 else {
                     return BPCategory.Low;
+                }
+            }
+        }
+
+        // calculate pulse pressure
+        public PPCategory PulsePressure
+        {
+            get
+            {
+                if ((Systolic - Diastolic) > 60) {
+                    return PPCategory.High;
+                }
+                if ((Systolic - Diastolic) <= 60 && (Systolic - Diastolic) >= 40 ) {
+                    return PPCategory.Normal;
+                }
+                else {
+                    return PPCategory.Low;
                 }
             }
         }

@@ -21,6 +21,7 @@ namespace BPCalculatorUnitTests
             bp.Systolic = 80;
             bp.Diastolic = 50;
             Assert.AreEqual(bp.Category, BPCategory.Low);
+            Assert.AreEqual(bp.PulsePressure, PPCategory.Low);
         }
 
         [TestMethod]
@@ -29,6 +30,7 @@ namespace BPCalculatorUnitTests
             bp.Systolic = 110;
             bp.Diastolic = 70;
             Assert.AreEqual(bp.Category, BPCategory.Ideal);
+            Assert.AreEqual(bp.PulsePressure, PPCategory.Normal);
         }
 
         [TestMethod]
@@ -37,6 +39,7 @@ namespace BPCalculatorUnitTests
             bp.Systolic = 130;
             bp.Diastolic = 85;
             Assert.AreEqual(bp.Category, BPCategory.PreHigh);
+            Assert.AreEqual(bp.PulsePressure, PPCategory.Normal);
         }
 
         [TestMethod]
@@ -45,6 +48,7 @@ namespace BPCalculatorUnitTests
             bp.Systolic = 170;
             bp.Diastolic = 95;
             Assert.AreEqual(bp.Category, BPCategory.High);
+            Assert.AreEqual(bp.PulsePressure, PPCategory.High);
         }
 
         [TestMethod]
