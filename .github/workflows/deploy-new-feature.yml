@@ -85,9 +85,9 @@ jobs:
           path: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp'
 
   # deploy code to webapp service
-  deploy_staging:
+  deploy_staging_feature:
     name: Deploy Feature to Staging
-    needs: build
+    needs: build_feature
     permissions:
       contents: none
     runs-on: windows-latest
