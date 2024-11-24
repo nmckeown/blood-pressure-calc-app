@@ -24,8 +24,8 @@ permissions:
 jobs:
   # build feature branch
   build_feature:
-    if: false
     name: Build Feature Branch
+    if: true
     runs-on: windows-latest
 
     steps:
@@ -65,6 +65,7 @@ jobs:
   # provision staging environment
   provision_staging:
     name: Provision Staging Infra
+    if: false
     #needs: owasp_dependency_check
     runs-on: ubuntu-latest
 
