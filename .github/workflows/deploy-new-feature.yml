@@ -2,7 +2,7 @@ name: Deploy New Feature
 
 env:
   AZURE_PROD_WEBAPP_NAME: prod-ca1app               # prod webapp
-  AZURE_STAGING_WEBAPP_NAME: staging2-ca1app        # staging webapp
+  AZURE_STAGING_WEBAPP_NAME: staging-ca1app        # staging webapp
   AZURE_RESOURCE_GROUP: ca1rg
   AZURE_SUB: 9ec68712-3805-4cf9-a4c1-4e5951df302b
   AZURE_WEBAPP_PACKAGE_PATH: 'publish'              # set this to the path to your web app project, defaults to the repository root

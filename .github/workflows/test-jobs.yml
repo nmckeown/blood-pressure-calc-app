@@ -190,7 +190,7 @@ jobs:
 
       # allow app come up for selenium tests
       - name: Pause
-        run: sleep 15
+        run: sleep 60
 
       # run selenium e2e tests
       - name: Run Selenium Tests
