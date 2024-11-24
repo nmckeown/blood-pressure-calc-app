@@ -221,7 +221,7 @@ jobs:
     needs: deploy_staging
     permissions:
       contents: none
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     environment:
       name: 'Staging'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
