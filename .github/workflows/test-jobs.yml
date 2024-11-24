@@ -243,8 +243,11 @@ jobs:
       # get publishing profile for newly provisioned staging environment
       - name: Get Publish Profile
         run: |
-          PublishProfile=$(az webapp deployment list-publishing-credentials --name ${{env.AZURE_STAGING_WEBAPP_NAME}} --resource-group ${{env.AZURE_RESOURCE_GROUP}} --subscription ${{env.AZURE_SUB}})
-          cat $PublishProfile >> "$GITHUB_ENV"
+          {
+            echo 'PublishProfile<<EOF'
+            az webapp deployment list-publishing-credentials --name ${{env.AZURE_STAGING_WEBAPP_NAME}} --resource-group ${{env.AZURE_RESOURCE_GROUP}} --subscription ${{env.AZURE_SUB}}
+            echo EOF
+          } >> "$GITHUB_ENV"
 
       # manual approval to deploy feature to staging
       - uses: trstringer/manual-approval@v1
