@@ -188,6 +188,10 @@ jobs:
           publish-profile: ${{ env.PublishProfile }}
           package: .
 
+      # allow app come up for selenium tests
+      - name: Pause
+        run: sleep 15
+
       # run selenium e2e tests
       - name: Run Selenium Tests
         run: dotnet test SeleniumTest.dll /Settings:SeleniumTest.runsettings --logger:"html;LogFileName=selenium.html"
@@ -255,7 +259,7 @@ jobs:
   # destroy staging environment
   delete_staging:
     name: Teardown Staging
-    needs: deploy_staging
+    needs: deploy_staging_feature
     runs-on: ubuntu-latest
     permissions:
       issues: write
