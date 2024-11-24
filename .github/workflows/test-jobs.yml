@@ -221,6 +221,7 @@ jobs:
     needs: deploy_staging
     permissions:
       contents: none
+      issues: write
     runs-on: ubuntu-latest
     environment:
       name: 'Staging'
