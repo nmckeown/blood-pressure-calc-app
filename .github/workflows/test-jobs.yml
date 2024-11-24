@@ -89,6 +89,7 @@ jobs:
 
   build:
     name: Build & Test
+    if: true
     runs-on: windows-latest
     needs: provision_staging
 
