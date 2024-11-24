@@ -62,6 +62,13 @@ jobs:
       - name: dotnet Publish
         run: dotnet publish -c Release -o '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp'
 
+      # upload build artifact for deploy job
+      - name: Upload artifact for Deployment Job
+        uses: actions/upload-artifact@v4
+        with:
+          name: .net-app-feature
+          path: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp'
+
   # provision staging environment
   provision_staging:
     name: Provision Staging Infra
