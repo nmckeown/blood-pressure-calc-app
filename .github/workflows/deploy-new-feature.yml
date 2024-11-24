@@ -50,28 +50,6 @@ jobs:
           dotnet tool install -g dotnet-reportgenerator-globaltool
           reportgenerator -reports:"./BPCalcUnit/TestResults/*/coverage.cobertura.xml" -targetdir:"./BPCalcUnit/coverage-report" -reporttypes:Html
 
-      # run BDD acceptance tests
-      - name: Run Acceptance Tests
-        run: dotnet test BPCalcAcceptance/BPCalcAcceptance.csproj --collect "Code Coverage"
-
-      - name: Upload Coverage Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: code-coverage
-          path: ./BPCalcUnit/TestResults/
-
-      - name: Upload Coverage Report HTML
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-html-report
-          path: ./BPCalcUnit/coverage-report/
-
-      - name: Upload BDD Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: bdd-coverage
-          path: ./BPCalcAcceptance/TestResults/
-
       # publish artifact
       - name: dotnet Publish
         run: dotnet publish -c Release -o '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp'

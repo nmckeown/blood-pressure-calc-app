@@ -2,7 +2,7 @@ name: Test Jobs
 
 env:
   AZURE_PROD_WEBAPP_NAME: prod-ca1app               # prod webapp
-  AZURE_STAGING_WEBAPP_NAME: staging2-ca1app        # staging webapp
+  AZURE_STAGING_WEBAPP_NAME: staging-ca1app        # staging webapp
   AZURE_RESOURCE_GROUP: ca1rg
   AZURE_SUB: 9ec68712-3805-4cf9-a4c1-4e5951df302b
   AZURE_WEBAPP_PACKAGE_PATH: 'publish'              # set this to the path to your web app project, defaults to the repository root
@@ -20,6 +20,44 @@ permissions:
   contents: read
 
 jobs:
+  # build feature branch
+  build_feature:
+    name: Build Feature Branch
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: pulse-pressure-feature
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Set Up Dependency Caching
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      # build app
+      - name: Build with dotnet
+        run: dotnet build --configuration Release
+
+      # run unit tests
+      - name: Run UNIT Tests
+        run: |
+          dotnet test BPCalcUnit/BPCalcUnitTests.csproj --collect "XPlat Code Coverage"
+          dotnet tool install -g dotnet-reportgenerator-globaltool
+          reportgenerator -reports:"./BPCalcUnit/TestResults/*/coverage.cobertura.xml" -targetdir:"./BPCalcUnit/coverage-report" -reporttypes:Html
+
+      # publish artifact
+      - name: dotnet Publish
+        run: dotnet publish -c Release -o '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp'
+
   # provision staging environment
   provision_staging:
     name: Provision Staging Infra
@@ -160,6 +198,61 @@ jobs:
           name: Selenium Tests Results
           path: TestResults/selenium.html
 
+  # deploy code to webapp service
+  deploy_staging_feature:
+    name: Deploy Feature to Staging
+    needs: deploy_staging
+    permissions:
+      contents: none
+    runs-on: windows-latest
+    environment:
+      name: 'Staging'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+    steps:    
+      - uses: actions/checkout@v4
+
+      # download artifact from build job
+      - name: Download Artifact From Build Job
+        uses: actions/download-artifact@v4
+        with:
+          name: .net-app-feature
+
+      # Log into Azure
+      - uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # get publishing profile for newly provisioned staging environment
+      - name: Get Publish Profile
+        run: |
+          az webapp deployment list-publishing-credentials --name ${{env.AZURE_STAGING_WEBAPP_NAME}} --resource-group ${{env.AZURE_RESOURCE_GROUP}} --subscription ${{env.AZURE_SUB}} | Tee-Object -Variable PublishProfile
+          echo $PublishProfile >> $GITHUB_ENV
+
+      # manual approval to deploy feature to staging
+      - uses: trstringer/manual-approval@v1
+        timeout-minutes: 10
+        with:
+          secret: ${{ github.TOKEN }}
+          approvers: nmckeown
+          minimum-approvals: 1
+          issue-title: "Deploy Staging Feature"
+          issue-body: "Please approve or deny"
+          exclude-workflow-initiator-as-approver: false
+          additional-approved-words: ''
+          additional-denied-words: ''
+
+      # deploy webapp to staging environment
+      - name: Deploy Feature to Staging WebApp
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_STAGING_WEBAPP_NAME }}
+          #startup-command: "dotnet BPCalculator.dll"
+          publish-profile: ${{ env.PublishProfile }}
+          package: .
+
+  # destroy staging environment
   delete_staging:
     name: Teardown Staging
     needs: deploy_staging
@@ -173,6 +266,7 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      # manual approval to destroy staging webapp
       - uses: trstringer/manual-approval@v1
         timeout-minutes: 10
         with:
