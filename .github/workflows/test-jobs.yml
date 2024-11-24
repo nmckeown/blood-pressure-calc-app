@@ -247,7 +247,9 @@ jobs:
           echo "PublishProfile<<EOF" >> $GITHUB_ENV
           echo $(az webapp deployment list-publishing-credentials --name ${{env.AZURE_STAGING_WEBAPP_NAME}} --resource-group ${{env.AZURE_RESOURCE_GROUP}} --subscription ${{env.AZURE_SUB}}) >> $GITHUB_ENV 
           echo "EOF" >> $GITHUB_ENV
-          
+          echo "PublishProfile=$PublishProfile"
+          echo "GITHUB_ENV=$GITHUB_ENV"
+
       # manual approval to deploy feature to staging
       - uses: trstringer/manual-approval@v1
         timeout-minutes: 10
