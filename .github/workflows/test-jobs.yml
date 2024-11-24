@@ -6,8 +6,10 @@ env:
   AZURE_RESOURCE_GROUP: ca1rg
   AZURE_SUB: 9ec68712-3805-4cf9-a4c1-4e5951df302b
   AZURE_WEBAPP_PACKAGE_PATH: 'publish'              # set this to the path to your web app project, defaults to the repository root
+  E2E_STAGING_FILE: 'SeleniumTest.staging.runsettings'
+  E2E_PROD_FILE: 'SeleniumTest.prod.runsettings'
   DOTNET_VERSION: '6'                               # set this to the .NET Core version to use
-  URI: https://ca1app.azurewebsites.net/    
+  PROD_URI: https://ca1app.azurewebsites.net/    
 
 on:
   push:
@@ -191,12 +193,12 @@ jobs:
           package: .
 
       # allow app come up for selenium tests
-      - name: Pause
-        run: sleep 60
+      #- name: Pause
+      #  run: sleep 60
 
       # run selenium e2e tests
       - name: Run Selenium Tests
-        run: dotnet test SeleniumTest.dll /Settings:SeleniumTest.runsettings --logger:"html;LogFileName=selenium.html"
+        run: dotnet test SeleniumTest.dll /Settings:${{ env.E2E_STAGING_FILE }} --logger:"html;LogFileName=selenium.html"
 
       # Upload results of selenium tests
       - uses: actions/upload-artifact@v4

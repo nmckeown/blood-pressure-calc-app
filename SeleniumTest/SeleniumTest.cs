@@ -30,9 +30,9 @@ namespace SeleniumTest
         public void Setup()
         {
             // read URL from SeleniumTest.runsettings (configure run settings)
-            //this.webAppUri = testContextInstance.Properties["webAppUri"].ToString();
+            this.webAppUri = testContextInstance.Properties["webAppUri"].ToString();
             
-            this.webAppUri = "https://ca1app.azurewebsites.net/";
+            //this.webAppUri = "https://ca1app.azurewebsites.net/";
         }
 
         [TestMethod]
@@ -68,24 +68,9 @@ namespace SeleniumTest
                 IWebElement BPCalc = new WebDriverWait(driver, TimeSpan.FromSeconds(2))
                     .Until(c => c.FindElement(By.Id("BP_Category")));
 
+                // check result
                 string bpval = BPCalc.Text.ToString();
                 StringAssert.Contains("Low", bpval);
-                //Assert.Contains("Low", bpval);
-
-                //var bpCalc = driver.FindElement(By.Id("Category")).Text.toString();
-                //Assert.Contains("Low", result);
-
-                // submit the form
-                //driver.FindElement(By.Id("form1")).Submit();
-
-                // explictly wait for result with "BMIValue" item
-                //IWebElement BMIValueElement = new WebDriverWait(driver, TimeSpan.FromSeconds(10))
-                //    .Until(c => c.FindElement(By.Id("BPCalc")));
-
-                // item comes back like "BMIValue: 24.96"
-                //String bmi = BMIValueElement.Text.ToString();
-
-                //StringAssert.EndsWith(bmi, "24.96");
 
                 driver.Quit();
 
