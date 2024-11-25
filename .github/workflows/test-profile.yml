@@ -12,10 +12,6 @@ env:
   PROD_URI: https://ca1app.azurewebsites.net/    
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
   workflow_dispatch:
 
 permissions:
