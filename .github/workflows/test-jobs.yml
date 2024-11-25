@@ -229,6 +229,8 @@ jobs:
 
     steps:    
       - uses: actions/checkout@v4
+        with:
+          ref: pulse-pressure-feature
 
       # download artifact from build job
       - name: Download Artifact From Build Job
@@ -256,6 +258,16 @@ jobs:
           #startup-command: "dotnet BPCalculator.dll"
           publish-profile: ${{ env.PublishProfile }}
           package: .
+      
+            # run selenium e2e tests
+      - name: Run Selenium Tests
+        run: dotnet test SeleniumTest.dll /Settings:${{ vars.E2E_RUN_FILE }} --logger:"html;LogFileName=selenium_feature.html"
+
+      # Upload results of selenium tests
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Selenium Tests Results
+          path: TestResults/selenium_feature.html
 
   # destroy staging environment
   delete_staging:
