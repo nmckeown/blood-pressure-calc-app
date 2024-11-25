@@ -61,7 +61,7 @@ namespace SeleniumTest
         // calculate
         BPCalcButton.Click();
 
-        IWebElement BPCalc = new WebDriverWait(driver, TimeSpan.FromSeconds(2))
+        IWebElement BPCalc = new WebDriverWait(driver, TimeSpan.FromSeconds(5))
           .Until(c => c.FindElement(By.Id("BP_Category")));
 
         // check results

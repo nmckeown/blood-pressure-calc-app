@@ -201,10 +201,6 @@ jobs:
           publish-profile: ${{ env.PublishProfile }}
           package: .
 
-      # allow app come up for selenium tests
-      #- name: Pause
-      #  run: sleep 60
-
       # run selenium e2e tests
       - name: Run Selenium Tests
         run: dotnet test SeleniumTest.dll /Settings:${{ vars.E2E_RUN_FILE }} --logger:"html;LogFileName=selenium.html"
