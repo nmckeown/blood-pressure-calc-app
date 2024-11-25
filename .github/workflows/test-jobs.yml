@@ -188,7 +188,7 @@ jobs:
       # get publishing profile for newly provisioned staging environment
       - name: Get Publish Profile
         run: |
-          az webapp deployment list-publishing-credentials --name ${{env.AZURE_WEBAPP_NAME}} --resource-group ${{env.AZURE_RESOURCE_GROUP}} --subscription ${{env.AZURE_SUB}} | Tee-Object -Variable PublishProfile
+          az webapp deployment list-publishing-credentials --name ${{ vars.AZURE_WEBAPP_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --subscription ${{ env.AZURE_SUB }} | Tee-Object -Variable PublishProfile
           echo $PublishProfile >>  %GITHUB_ENV%
 
       # deploy webapp to staging environment
@@ -207,7 +207,7 @@ jobs:
 
       # run selenium e2e tests
       - name: Run Selenium Tests
-        run: dotnet test SeleniumTest.dll /Settings:${{ env.E2E_RUN_FILE }} --logger:"html;LogFileName=selenium.html"
+        run: dotnet test SeleniumTest.dll /Settings:${{ vars.E2E_RUN_FILE }} --logger:"html;LogFileName=selenium.html"
 
       # Upload results of selenium tests
       - uses: actions/upload-artifact@v4
@@ -244,7 +244,7 @@ jobs:
       # get publishing profile for newly provisioned staging environment
       - name: Get Publish Profile
         run: |
-          az webapp deployment list-publishing-credentials --name ${{env.AZURE_WEBAPP_NAME}} --resource-group ${{env.AZURE_RESOURCE_GROUP}} --subscription ${{env.AZURE_SUB}} | Tee-Object -Variable PublishProfile
+          az webapp deployment list-publishing-credentials --name ${{ vars.AZURE_WEBAPP_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --subscription ${{ env.AZURE_SUB }} | Tee-Object -Variable PublishProfile
           echo $PublishProfile >>  %GITHUB_ENV%
 
       # deploy webapp to staging environment
