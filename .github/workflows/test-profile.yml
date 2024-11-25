@@ -43,3 +43,5 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
           echo "PublishProfile=$PublishProfile"
           echo "GITHUB_ENV=$GITHUB_ENV"
+          echo "PublishProfile=$PublishProfile" >> $GITHUB_ENV
+          cat $GITHUB_ENV
