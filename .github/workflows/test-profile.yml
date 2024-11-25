@@ -41,4 +41,4 @@ jobs:
           PublishProfile=$(cat profile.json)
           echo "PublishProfile=$PublishProfile"
           echo "PublishProfile=$PublishProfile" >> $GITHUB_ENV
-          cat $GITHUB_ENV
+          echo "PublishProfile="{{ env.PublishProfile }}
