@@ -65,30 +65,21 @@ namespace SeleniumTest
                 // calculate
                 BPCalcButton.Click();
 
+                // check results
                 IWebElement BPCalc = new WebDriverWait(driver, TimeSpan.FromSeconds(2))
                     .Until(c => c.FindElement(By.Id("BP_Category")));
 
                 string bpval = BPCalc.Text.ToString();
                 StringAssert.Contains("Low", bpval);
-                //Assert.Contains("Low", bpval);
 
-                //var bpCalc = driver.FindElement(By.Id("Category")).Text.toString();
-                //Assert.Contains("Low", result);
+                IWebElement PPCalc = new WebDriverWait(driver, TimeSpan.FromSeconds(2))
+                    .Until(c => c.FindElement(By.Id("BP_PulsePressure)));
 
-                // submit the form
-                //driver.FindElement(By.Id("form1")).Submit();
-
-                // explictly wait for result with "BMIValue" item
-                //IWebElement BMIValueElement = new WebDriverWait(driver, TimeSpan.FromSeconds(10))
-                //    .Until(c => c.FindElement(By.Id("BPCalc")));
-
-                // item comes back like "BMIValue: 24.96"
-                //String bmi = BMIValueElement.Text.ToString();
-
-                //StringAssert.EndsWith(bmi, "24.96");
-
+                string ppval = PPCalc.Text.ToString();
+                StringAssert.Contains("Low", ppval);
+  
+                // quit chrome driver
                 driver.Quit();
-
 
             }
         }
