@@ -48,15 +48,13 @@ namespace SeleniumTest
             {
                 // any exception below results in a test fail
 
-                // navigate to URI for temperature converter
-                // web app running on IIS express
+                // web app running on azure
                 driver.Navigate().GoToUrl(webAppUri);
 
                 // get input values and submit button
                 IWebElement BPSystolicElement = driver.FindElement(By.Id("BP_Systolic"));
                 IWebElement BPDiastolicElement = driver.FindElement(By.Id("BP_Diastolic"));
                 IWebElement BPCalcButton = driver.FindElement(By.Id("BP_Calc"));
-
 
                 // input values
                 BPSystolicElement.SendKeys("80");
