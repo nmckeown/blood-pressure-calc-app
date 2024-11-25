@@ -20,8 +20,7 @@ permissions:
 jobs:
   # deploy code to webapp service
   test_profile:
-    name: Deploy Feature to Staging
-    needs: deploy_staging
+    name: Get Profile
     permissions:
       contents: none
       issues: write
