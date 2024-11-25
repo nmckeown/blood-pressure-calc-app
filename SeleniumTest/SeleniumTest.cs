@@ -71,7 +71,7 @@ namespace SeleniumTest
                 StringAssert.Contains("Low", bpval);
 
                 IWebElement PPCalc = new WebDriverWait(driver, TimeSpan.FromSeconds(2))
-                    .Until(c => c.FindElement(By.Id("BP_PulsePressure)));
+                    .Until(c => c.FindElement(By.Id("BP_PulsePressure")));
 
                 string ppval = PPCalc.Text.ToString();
                 StringAssert.Contains("Low", ppval);
