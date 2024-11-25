@@ -1,4 +1,4 @@
-name: Test Jobs
+name: Test Profile
 
 env:
   AZURE_PROD_WEBAPP_NAME: prod-ca1app               # prod webapp
