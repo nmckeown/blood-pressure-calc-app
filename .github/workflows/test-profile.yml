@@ -37,8 +37,9 @@ jobs:
         run: |
           echo "PublishProfile<<EOF" >> $GITHUB_ENV
           az webapp deployment list-publishing-credentials --name ${{env.AZURE_STAGING_WEBAPP_NAME}} --resource-group ${{env.AZURE_RESOURCE_GROUP}} --subscription ${{env.AZURE_SUB}} >> profile.json
-          cat profile.json
-          echo "PublishProfile=$(cat profile.json)" >> $GITHUB_ENV
+          echo 'PUBLISH_PROFILE<<EOF' >> $GITHUB_ENV
+          cat profile.json >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
       
       - name: Print Profile
-        run: echo {{ env.PublishProfile }}
+        run: echo {{ env.PUBLISH_PROFILE }}
