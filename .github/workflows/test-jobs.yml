@@ -29,7 +29,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-
+      # checkout feature branch
       - uses: actions/checkout@v4
         with:
           ref: pulse-pressure-feature
@@ -131,6 +131,7 @@ jobs:
       - name: Run Acceptance Tests
         run: dotnet test BPCalcAcceptance/BPCalcAcceptance.csproj --collect "Code Coverage"
 
+      # upload reports
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v4
         with:
@@ -255,7 +256,7 @@ jobs:
           publish-profile: ${{ env.PublishProfile }}
           package: .
       
-            # run selenium e2e tests
+      # run selenium e2e tests
       - name: Run E2E Tests
         run: dotnet test SeleniumTest.dll /Settings:${{ vars.E2E_RUN_FILE }} --logger:"html;LogFileName=selenium_feature.html"
 
@@ -292,5 +293,6 @@ jobs:
           additional-approved-words: ''
           additional-denied-words: ''
 
+      # delete staging web app
       - name: Delete Staging WebApp
         run: az webapp delete --name ${{env.AZURE_STAGING_WEBAPP_NAME}} --resource-group ${{env.AZURE_RESOURCE_GROUP}}
