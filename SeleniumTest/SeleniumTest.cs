@@ -47,7 +47,6 @@ namespace SeleniumTest
             using (IWebDriver driver = new ChromeDriver(chromeDriverPath))
             {
                 // any exception below results in a test fail
-
                 // web app running on azure
                 driver.Navigate().GoToUrl(webAppUri);
 
