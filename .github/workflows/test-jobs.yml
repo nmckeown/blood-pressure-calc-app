@@ -315,7 +315,7 @@ jobs:
   canary_deploy:
     name: Canary Deploy Feature
     if: true
-    needs: deploy_staging_feature
+    needs: [deploy_production, deploy_staging_feature]
     runs-on: ubuntu-latest
 
     steps:
@@ -326,7 +326,7 @@ jobs:
 
       # split traffic 50% across staging and production
       - name: Split Traffic Prod/Staging
-        run: az webapp deployment slot swap --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --distribution staging=50
+        run: az webapp traffic-routing set --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --distribution staging=50
 
   # destroy infra
   delete_infra:
