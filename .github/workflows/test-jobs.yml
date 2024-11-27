@@ -315,7 +315,7 @@ jobs:
   canary_deploy:
     name: Canary Deploy Feature
     if: true
-    needs: [deploy_production, deploy_staging_feature]
+    needs: [ deploy_production, deploy_staging_feature ]
     runs-on: ubuntu-latest
 
     steps:
@@ -328,10 +328,40 @@ jobs:
       - name: Split Traffic Prod/Staging
         run: az webapp traffic-routing set --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --distribution staging=50
 
+  # canary deploy new feature
+  blue_green_deploy:
+    name: Blue/Green Deploymment
+    if: true
+    needs: canary_deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      # Log into Azure
+      - uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # manual approval to swap slots
+      - uses: trstringer/manual-approval@v1
+        timeout-minutes: 10
+        with:
+          secret: ${{ github.TOKEN }}
+          approvers: nmckeown
+          minimum-approvals: 1
+          issue-title: "Swap Staging with Production"
+          issue-body: "Please approve or deny"
+          exclude-workflow-initiator-as-approver: false
+          additional-approved-words: ''
+          additional-denied-words: ''
+
+      # blue/green
+      - name: Swap Staging and Production
+        run: az webapp deployment slot swap --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --slot staging --target-slot production
+
   # destroy infra
   delete_infra:
     name: Teardown Infrastructure
-    needs: canary_deploy
+    needs: blue_green_deploy
     runs-on: ubuntu-latest
     permissions:
       issues: write
