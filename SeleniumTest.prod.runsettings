@@ -2,6 +2,6 @@
 <RunSettings>    
   <!-- Parameters used by tests at runtime -->  
   <TestRunParameters>  
-    <Parameter name="webAppUri" value="https://prod-ca1app.azurewebsites.net/" />  
+    <Parameter name="webAppUri" value="https://ca1app.azurewebsites.net/" />  
   </TestRunParameters>  
 </RunSettings> 
