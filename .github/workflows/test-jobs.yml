@@ -162,7 +162,7 @@ jobs:
           name: .net-app
           path: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp'
 
-  # deploy code to webapp service
+  # deploy code to staging webapp
   deploy_staging:
     name: Deploy Staging & E2E
     needs: build
@@ -187,7 +187,7 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # get publishing profile for newly provisioned staging environment
+      # get publishing profile for webapp
       - name: Get Publish Profile
         run: |
           az webapp deployment list-publishing-credentials --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --subscription ${{ env.AZURE_SUB }} | Tee-Object -Variable PublishProfile
@@ -213,6 +213,48 @@ jobs:
         with:
           name: E2E Tests Results
           path: TestResults/selenium.html
+
+  # deploy code to staging webapp
+  deploy_production:
+    name: Deploy Production
+    needs: build
+    permissions:
+      contents: none
+    runs-on: windows-latest
+    environment:
+      name: 'production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+    steps:    
+      - uses: actions/checkout@v4
+
+      # download artifact from build job
+      - name: Download Artifact From Build Job
+        uses: actions/download-artifact@v4
+        with:
+          name: .net-app
+
+      # Log into Azure
+      - uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # get publishing profile for webapp
+      - name: Get Publish Profile
+        run: |
+          az webapp deployment list-publishing-credentials --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --subscription ${{ env.AZURE_SUB }} | Tee-Object -Variable PublishProfile
+          echo $PublishProfile >>  %GITHUB_ENV%
+
+      # deploy webapp to staging environment
+      - name: Deploy to Prod WebApp
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          #startup-command: "dotnet BPCalculator.dll"
+          slot-name: production
+          publish-profile: ${{ env.PublishProfile }}
+          package: .
 
   # deploy code to webapp service
   deploy_staging_feature:
@@ -242,7 +284,7 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # get publishing profile for newly provisioned staging environment
+      # get publishing profile for webapp
       - name: Get Publish Profile
         run: |
           az webapp deployment list-publishing-credentials --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --subscription ${{ env.AZURE_SUB }} | Tee-Object -Variable PublishProfile
@@ -269,10 +311,27 @@ jobs:
           name: E2E Feature Tests Results
           path: TestResults/selenium_feature.html
 
-  # destroy staging environment
-  delete_staging:
-    name: Teardown Infrastructure
+  # canary deploy new feature
+  canary_deploy:
+    name: Canary Deploy Feature
+    if: true
     needs: deploy_staging_feature
+    runs-on: ubuntu-latest
+
+    steps:
+      # Log into Azure
+      - uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # split traffic 50% across staging and production
+      - name: Split Traffic Prod/Staging
+        run: az webapp deployment slot swap --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --distribution staging=50
+
+  # destroy infra
+  delete_infra:
+    name: Teardown Infrastructure
+    needs: canary_deploy
     runs-on: ubuntu-latest
     permissions:
       issues: write
@@ -283,7 +342,7 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # manual approval to destroy staging webapp
+      # manual approval to destroy webapp
       - uses: trstringer/manual-approval@v1
         timeout-minutes: 10
         with:
@@ -296,6 +355,6 @@ jobs:
           additional-approved-words: ''
           additional-denied-words: ''
 
-      # delete staging web app
-      - name: Delete Staging WebApp
+      # destroy staging web app
+      - name: Delete WebApp
         run: az webapp delete --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }}
