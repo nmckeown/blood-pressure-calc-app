@@ -2,13 +2,9 @@ name: Test Jobs
 
 env:
   AZURE_WEBAPP_NAME: ca1app               # webapp name
-  AZURE_PROD_WEBAPP_NAME: ca1app               # prod webapp
-  AZURE_STAGING_WEBAPP_NAME: ca1app-staging       # staging webapp
   AZURE_RESOURCE_GROUP: ca1rg
   AZURE_SUB: 9ec68712-3805-4cf9-a4c1-4e5951df302b
   AZURE_WEBAPP_PACKAGE_PATH: 'publish'              # set this to the path to your web app project, defaults to the repository root
-  E2E_STAGING_FILE: 'SeleniumTest.staging.runsettings'
-  E2E_PROD_FILE: 'SeleniumTest.prod.runsettings'
   DOTNET_VERSION: '6'                               # set this to the .NET Core version to use
   PROD_URI: https://ca1app.azurewebsites.net/    
 
@@ -262,7 +258,6 @@ jobs:
     needs: deploy_staging
     permissions:
       contents: none
-      issues: write
     runs-on: windows-latest
     environment:
       name: 'staging'
@@ -334,6 +329,8 @@ jobs:
     if: true
     needs: canary_deploy
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
 
     steps:
       # Log into Azure
