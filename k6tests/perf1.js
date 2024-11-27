@@ -45,7 +45,7 @@ export let options = {
 // Export a default function - this defines the entry point for your VUs,
 // similar to the main() function in many other languages.
 export default function() {
-  let res = http.get("https://ca1app.azurewebsites.net/");
+  let res = http.get("https://staging-ca1app.azurewebsites.net/");
 
   check(res, {
       "is status 200": (r) => r.status === 200
