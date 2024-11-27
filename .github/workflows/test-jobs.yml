@@ -271,7 +271,7 @@ jobs:
 
   # destroy staging environment
   delete_staging:
-    name: Teardown Staging
+    name: Teardown Infrastructure
     needs: deploy_staging_feature
     runs-on: ubuntu-latest
     permissions:
@@ -290,7 +290,7 @@ jobs:
           secret: ${{ github.TOKEN }}
           approvers: nmckeown
           minimum-approvals: 1
-          issue-title: "Destroy Staging Env"
+          issue-title: "Destroy WebApp"
           issue-body: "Please approve or deny"
           exclude-workflow-initiator-as-approver: false
           additional-approved-words: ''
