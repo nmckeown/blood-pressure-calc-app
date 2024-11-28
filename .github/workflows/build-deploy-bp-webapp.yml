@@ -1,26 +1,19 @@
 # Author: Noel McKeown (TUD)
 # Student Number: x00218705
 # Date: Dec-2024
-# This workflow will build and push a .NET Core app to an Azure Web App when a commit is pushed to your default branch.
+# This workflow will build and push a .NET Core app to an Azure Web App when a commit is pushed to the default branch.
 
-name: Build and deploy BP Calculator ASP.Net Core app to an Azure Web App
+name: Build and Deploy Blood Pressure Calculator App to Azure Web App
 
 env:
-  AZURE_PROD_WEBAPP_NAME: prod-ca1app               # prod webapp
-  AZURE_STAGING_WEBAPP_NAME: staging-ca1app        # staging webapp
-  AZURE_RESOURCE_GROUP: ca1rg
-  AZURE_SUB: 9ec68712-3805-4cf9-a4c1-4e5951df302b
-  AZURE_WEBAPP_PACKAGE_PATH: 'publish'              # set this to the path to your web app project, defaults to the repository root
-  E2E_STAGING_FILE: 'SeleniumTest.staging.runsettings'
-  E2E_PROD_FILE: 'SeleniumTest.prod.runsettings'
-  DOTNET_VERSION: '6'                               # set this to the .NET Core version to use
-  PROD_URI: https://ca1app.azurewebsites.net/    
+  AZURE_WEBAPP_PACKAGE_PATH: 'publish'              # path for web app 
+  DOTNET_VERSION: '6'                               # .NET Core version
 
 on:
-  #push:
-  #  branches: [ "main" ]
-  #pull_request:
-  #  branches: [ "main" ]
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
   workflow_dispatch:
 
 permissions:
@@ -75,9 +68,9 @@ jobs:
           path: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp'
 
   # provision staging environment
-  provision_staging:
-    name: Provision Staging Infra
-    if: false
+  provision_infra:
+    name: Provision Infrastruture
+    if: true
     #needs: owasp_dependency_check
     runs-on: ubuntu-latest
 
@@ -91,13 +84,13 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       # Deploy ARM template
-      - name: Provision Staging
+      - name: Provision WebApp
         uses: azure/arm-deploy@v2
         with:
           subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
           resourceGroupName: ${{ secrets.AZURE_RG }}
-          template: ./IaC/webapp.template.json
-          parameters: sites_ca1app_name=${{ env.AZURE_STAGING_WEBAPP_NAME }}
+          template: ./IaC/ca1app.template.json
+          parameters: sites_ca1app_name=${{ secrets.AZURE_WEBAPP_NAME }}
 
   # build source code and run unit/acceptance tests
   build:
@@ -171,7 +164,6 @@ jobs:
   scan_code:
     name: Static Code Analysis
     if: true
-    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -187,13 +179,12 @@ jobs:
             -Dsonar.projectKey=nmckeown_blood-pressure-calc-app
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}     
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} 
 
   # scans code depenencies for security vulns
   owasp_dependency_check:
     name: OWASP Depenency Check
     if: true
-    needs: scan_code
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -214,12 +205,13 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Depcheck report
-          path: ${{github.workspace}}/reports
+          path: ${{ github.workspace }}/reports
 
- # deploy code to staging webapp service
+  # deploy code to staging webapp
   deploy_staging:
-    name: Deploy Staging & E2E
-    needs: build
+    name: Deploy Staging & Test E2E
+    if: true
+    needs: [ provision_infra, build, scan_code, owasp_dependency_check ]
     permissions:
       contents: none
     runs-on: windows-latest
@@ -241,10 +233,10 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # get publishing profile for newly provisioned staging environment
+      # get publishing profile for webapp
       - name: Get Publish Profile
         run: |
-          az webapp deployment list-publishing-credentials --name ${{ vars.AZURE_WEBAPP_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --subscription ${{ env.AZURE_SUB }} | Tee-Object -Variable PublishProfile
+          az webapp deployment list-publishing-credentials --name ${{ secrets.AZURE_WEBAPP_NAME }} --resource-group ${{ secrets.AZURE_RG }} --subscription ${{ secrets.AZURE_SUBSCRIPTION }} | Tee-Object -Variable PublishProfile
           echo $PublishProfile >>  %GITHUB_ENV%
 
       # deploy webapp to staging environment
@@ -252,8 +244,9 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
-          app-name: ${{ vars.AZURE_WEBAPP_NAME }}
+          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
           #startup-command: "dotnet BPCalculator.dll"
+          slot-name: staging
           publish-profile: ${{ env.PublishProfile }}
           package: .
 
@@ -267,13 +260,105 @@ jobs:
           name: E2E Tests Results
           path: TestResults/selenium.html
 
-  # deploy feature to staging webapp service
-  deploy_staging_feature:
-    name: Deploy Feature to Staging
+  # performance / load testing
+  k6_load_test:
+    name: K6 Perf Testing
+    if: true
     needs: deploy_staging
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Pull Docker image for k6
+      run: docker pull grafana/k6
+
+    - name: Run k6 load test1, capture report
+      run: docker run -i grafana/k6 run - <k6tests/perf1.js > k6report1.txt
+
+    - name: Run k6 load test2, capture report
+      run: docker run -i grafana/k6 run - <k6tests/perf2.js > k6report2.txt
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: k6report1
+        path: k6report1.txt
+
+    - uses: actions/upload-artifact@v4
+      with:
+          name: k6report2
+          path: k6report2.txt
+
+  # baseline app security scan / pen test
+  zap_baseline_scan:
+    name: Zap Pen Test
+    if: true
+    needs: k6_load_test
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Pull Docker image for ZAP
+      run: docker pull zaproxy/zap-weekly
+
+    - name: Run baseline scan
+      run: docker run -v /report:/zap/wrk/:rw --user root -t zaproxy/zap-weekly zap-baseline.py -t ${{ secrets.AZURE_STAGING_URL }} -I -r zapreport.html
+  
+    - uses: actions/upload-artifact@v4
+      name: upload ZAP report
+      with:
+        name: ZAPreport
+        path: /report/zapreport.html
+
+  # deploy code to staging webapp
+  deploy_production:
+    name: Deploy Production
+    if: true
+    needs: [ provision_infra, build, deploy_staging, k6_load_test, zap_baseline_scan ]
     permissions:
       contents: none
-      issues: write
+    runs-on: windows-latest
+    environment:
+      name: 'production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+
+    steps:    
+      - uses: actions/checkout@v4
+
+      # download artifact from build job
+      - name: Download Artifact From Build Job
+        uses: actions/download-artifact@v4
+        with:
+          name: .net-app
+
+      # Log into Azure
+      - uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # get publishing profile for webapp
+      - name: Get Publish Profile
+        run: |
+          az webapp deployment list-publishing-credentials --name ${{ secrets.AZURE_WEBAPP_NAME }} --resource-group ${{ secrets.AZURE_RG }} --subscription ${{ secrets.AZURE_SUBSCRIPTION }} | Tee-Object -Variable PublishProfile
+          echo $PublishProfile >>  %GITHUB_ENV%
+
+      # deploy webapp to staging environment
+      - name: Deploy to Prod WebApp
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
+          #startup-command: "dotnet BPCalculator.dll"
+          slot-name: production
+          publish-profile: ${{ env.PublishProfile }}
+          package: .
+
+  # deploy code to webapp service
+  deploy_staging_feature:
+    name: Deploy Feature to Staging
+    if: true
+    needs: [ provision_infra, build_feature, deploy_staging, zap_baseline_scan, k6_load_test ]
+    permissions:
+      contents: none
     runs-on: windows-latest
     environment:
       name: 'staging'
@@ -295,10 +380,10 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # get publishing profile for newly provisioned staging environment
+      # get publishing profile for webapp
       - name: Get Publish Profile
         run: |
-          az webapp deployment list-publishing-credentials --name ${{ vars.AZURE_WEBAPP_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --subscription ${{ env.AZURE_SUB }} | Tee-Object -Variable PublishProfile
+          az webapp deployment list-publishing-credentials --name ${{ secrets.AZURE_WEBAPP_NAME }} --resource-group ${{ secrets.AZURE_RG }} --subscription ${{ secrets.AZURE_SUBSCRIPTION }} | Tee-Object -Variable PublishProfile
           echo $PublishProfile >>  %GITHUB_ENV%
 
       # deploy webapp to staging environment
@@ -306,9 +391,10 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
-          app-name: ${{ vars.AZURE_WEBAPP_NAME }}
+          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
           #startup-command: "dotnet BPCalculator.dll"
           publish-profile: ${{ env.PublishProfile }}
+          slot-name: staging
           package: .
       
       # run selenium e2e tests
@@ -321,51 +407,28 @@ jobs:
           name: E2E Feature Tests Results
           path: TestResults/selenium_feature.html
 
-  # baseline app security scan / pen test
-  zap_baseline_scan:
-    name: Zap Pen Test
+  # canary deploy new feature
+  canary_deploy:
+    name: Canary Deploy Feature
     if: true
-    needs: deploy_staging
+    needs: [ deploy_production, deploy_staging_feature ]
     runs-on: ubuntu-latest
 
     steps:
-    - name: Pull Docker image for ZAP
-      run: docker pull zaproxy/zap-weekly
+      # Log into Azure
+      - uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Run baseline scan
-      run: docker run -v /report:/zap/wrk/:rw --user root -t zaproxy/zap-weekly zap-baseline.py -t ${{env.URI}} -I -r zapreport.html
-  
-    - uses: actions/upload-artifact@v4
-      name: upload ZAP report
-      with:
-        name: ZAPreport
-        path: /report/zapreport.html
+      # split traffic 50% across staging and production
+      - name: Split Traffic Prod/Staging
+        run: az webapp traffic-routing set --name ${{ secrets.AZURE_WEBAPP_NAME }} --resource-group ${{ secrets.AZURE_RG }} --distribution staging=50
 
-  # performance / load testing
-  k6_load_test:
-    name: K6 Perf Testing
+  # canary deploy new feature
+  blue_green_deploy:
+    name: Blue/Green Deploymment
     if: true
-    needs: zap_baseline_scan
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Pull Docker image for k6
-      run: docker pull grafana/k6
-
-    - name: Run k6 load test, capture report
-      run: docker run -i grafana/k6 run - <k6tests/perf2.js > k6report.txt
-
-    - uses: actions/upload-artifact@v4
-      with:
-        name: k6report
-        path: k6report.txt
-
-  # destroy staging environment
-  delete_staging:
-    name: Teardown Staging
-    needs: deploy_staging_feature
+    needs: canary_deploy
     runs-on: ubuntu-latest
     permissions:
       issues: write
@@ -376,19 +439,51 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      # manual approval to destroy staging webapp
+      # manual approval to swap slots
       - uses: trstringer/manual-approval@v1
         timeout-minutes: 10
         with:
           secret: ${{ github.TOKEN }}
           approvers: nmckeown
           minimum-approvals: 1
-          issue-title: "Destroy Staging Env"
+          issue-title: "Swap Staging with Production"
           issue-body: "Please approve or deny"
           exclude-workflow-initiator-as-approver: false
           additional-approved-words: ''
           additional-denied-words: ''
 
-      # delete staging web app
-      - name: Delete Staging WebApp
-        run: az webapp delete --name ${{env.AZURE_STAGING_WEBAPP_NAME}} --resource-group ${{env.AZURE_RESOURCE_GROUP}}
+      # blue/green
+      - name: Swap Staging and Production
+        run: az webapp deployment slot swap --name ${{ secrets.AZURE_WEBAPP_NAME }} --resource-group ${{ secrets.AZURE_RG }} --slot staging --target-slot production
+
+  # destroy infra
+  delete_infra:
+    name: Teardown Infrastructure
+    if: true
+    needs: blue_green_deploy
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+
+    steps:
+      # Log into Azure
+      - uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # manual approval to destroy webapp
+      - uses: trstringer/manual-approval@v1
+        timeout-minutes: 10
+        with:
+          secret: ${{ github.TOKEN }}
+          approvers: nmckeown
+          minimum-approvals: 1
+          issue-title: "Destroy WebApp"
+          issue-body: "Please approve or deny"
+          exclude-workflow-initiator-as-approver: false
+          additional-approved-words: ''
+          additional-denied-words: ''
+
+      # destroy staging web app
+      - name: Delete WebApp
+        run: az webapp delete --name ${{ secrets.AZURE_WEBAPP_NAME }} --resource-group ${{ secrets.AZURE_RG }}
