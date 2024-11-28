@@ -67,11 +67,10 @@ jobs:
           name: .net-app-feature
           path: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/myapp'
 
-  # provision staging environment
+  # provision webapp infrastructure
   provision_infra:
     name: Provision Infrastruture
     if: true
-    #needs: owasp_dependency_check
     runs-on: ubuntu-latest
 
     steps:
@@ -97,7 +96,6 @@ jobs:
     name: Build & Test
     if: true
     runs-on: windows-latest
-    #needs: provision_staging
 
     steps:
       - uses: actions/checkout@v4   
@@ -244,8 +242,7 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
-          app-name: ${{ vars.WEBAPP_NAME}}
-          #startup-command: "dotnet BPCalculator.dll"
+          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
           slot-name: staging
           publish-profile: ${{ env.PublishProfile }}
           package: .
@@ -346,8 +343,7 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
-          app-name: ${{ vars.WEBAPP_NAME }}
-          #startup-command: "dotnet BPCalculator.dll"
+          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
           slot-name: production
           publish-profile: ${{ env.PublishProfile }}
           package: .
@@ -391,8 +387,7 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
         with:
-          app-name: ${{ vars.WEBAPP_NAME }}
-          #startup-command: "dotnet BPCalculator.dll"
+          app-name: ${{ secrets.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ env.PublishProfile }}
           slot-name: staging
           package: .
