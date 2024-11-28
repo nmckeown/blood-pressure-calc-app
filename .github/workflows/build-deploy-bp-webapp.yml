@@ -1,7 +1,7 @@
 # Author: Noel McKeown (TUD)
 # Student Number: x00218705
 # Date: Dec-2024
-# This workflow will build and push a .NET Core app to an Azure Web App when a commit is pushed to the default branch.
+# This workflow will build and push a .NET Core app to an Azure Web App when a commit is pushed to the main branch.
 
 name: Build and Deploy Blood Pressure Calculator App to Azure Web App
 
@@ -274,17 +274,9 @@ jobs:
     - name: Pull Docker image for k6
       run: docker pull grafana/k6
 
-    - name: Run k6 load test1, capture report
-      run: docker run -i grafana/k6 run - <k6tests/perf1.js > k6report1.txt
-
     - name: Run k6 load test2, capture report
       run: docker run -i grafana/k6 run - <k6tests/perf2.js > k6report2.txt
-
-    - uses: actions/upload-artifact@v4
-      with:
-        name: k6report1
-        path: k6report1.txt
-
+      
     - uses: actions/upload-artifact@v4
       with:
           name: k6report2
