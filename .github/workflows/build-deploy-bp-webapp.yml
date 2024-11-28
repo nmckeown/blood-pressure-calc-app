@@ -236,7 +236,7 @@ jobs:
       # get publishing profile for webapp
       - name: Get Publish Profile
         run: |
-          az webapp deployment list-publishing-credentials --name ${{ vars.WEBAPP_NAME }} --resource-group ${{ secrets.AZURE_RG }} --subscription ${{ secrets.AZURE_SUBSCRIPTION }} | Tee-Object -Variable PublishProfile
+          az webapp deployment list-publishing-credentials --name ${{ secrets.AZURE_WEBAPP_NAME }} --resource-group ${{ secrets.AZURE_RG }} --subscription ${{ secrets.AZURE_SUBSCRIPTION }} | Tee-Object -Variable PublishProfile
           echo $PublishProfile >>  %GITHUB_ENV%
 
       # deploy webapp to staging environment
@@ -338,7 +338,7 @@ jobs:
       # get publishing profile for webapp
       - name: Get Publish Profile
         run: |
-          az webapp deployment list-publishing-credentials --name ${{ vars.WEBAPP_NAME }} --resource-group ${{ secrets.AZURE_RG }} --subscription ${{ secrets.AZURE_SUBSCRIPTION }} | Tee-Object -Variable PublishProfile
+          az webapp deployment list-publishing-credentials --name ${{ secrets.AZURE_WEBAPP_NAME }} --resource-group ${{ secrets.AZURE_RG }} --subscription ${{ secrets.AZURE_SUBSCRIPTION }} | Tee-Object -Variable PublishProfile
           echo $PublishProfile >>  %GITHUB_ENV%
 
       # deploy webapp to staging environment
@@ -383,7 +383,7 @@ jobs:
       # get publishing profile for webapp
       - name: Get Publish Profile
         run: |
-          az webapp deployment list-publishing-credentials --name ${{ vars.WEBAPP_NAME }} --resource-group ${{ secrets.AZURE_RG }} --subscription ${{ secrets.AZURE_SUBSCRIPTION }} | Tee-Object -Variable PublishProfile
+          az webapp deployment list-publishing-credentials --name ${{ secrets.AZURE_WEBAPP_NAME }} --resource-group ${{ secrets.AZURE_RG }} --subscription ${{ secrets.AZURE_SUBSCRIPTION }} | Tee-Object -Variable PublishProfile
           echo $PublishProfile >>  %GITHUB_ENV%
 
       # deploy webapp to staging environment
