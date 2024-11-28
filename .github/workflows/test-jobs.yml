@@ -356,7 +356,7 @@ jobs:
   deploy_staging_feature:
     name: Deploy Feature to Staging
     if: true
-    needs: [ provision_infra, build, deploy_staging ]
+    needs: [ provision_infra, build_feature, deploy_staging ]
     permissions:
       contents: none
     runs-on: windows-latest
