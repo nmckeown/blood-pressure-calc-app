@@ -293,10 +293,10 @@ jobs:
     - name: Pull Docker image for k6
       run: docker pull grafana/k6
 
-    - name: Run k6 load test, capture report
+    - name: Run k6 load test1, capture report
       run: docker run -i grafana/k6 run - <k6tests/perf1.js > k6report1.txt
 
-    - name: Run k6 load test, capture report
+    - name: Run k6 load test2, capture report
       run: docker run -i grafana/k6 run - <k6tests/perf2.js > k6report2.txt
 
     - uses: actions/upload-artifact@v4
@@ -356,7 +356,7 @@ jobs:
   deploy_staging_feature:
     name: Deploy Feature to Staging
     if: true
-    needs: [ provision_infra, build_feature, deploy_staging ]
+    needs: [ provision_infra, build_feature, deploy_staging, zap_baseline_scan, k6_load_test ]
     permissions:
       contents: none
     runs-on: windows-latest
