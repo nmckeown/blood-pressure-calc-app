@@ -3,7 +3,7 @@ name: Test Jobs
 env:
   AZURE_WEBAPP_NAME: ca1app               # webapp name
   AZURE_RESOURCE_GROUP: ca1rg
-  AZURE_SUB: 9ec68712-3805-4cf9-a4c1-4e5951df302b
+  #AZURE_SUB: 9ec68712-3805-4cf9-a4c1-4e5951df302b
   AZURE_WEBAPP_PACKAGE_PATH: 'publish'              # set this to the path to your web app project, defaults to the repository root
   DOTNET_VERSION: '6'                               # set this to the .NET Core version to use
   PROD_URI: https://ca1app.azurewebsites.net/    
@@ -186,7 +186,7 @@ jobs:
       # get publishing profile for webapp
       - name: Get Publish Profile
         run: |
-          az webapp deployment list-publishing-credentials --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --subscription ${{ env.AZURE_SUB }} | Tee-Object -Variable PublishProfile
+          az webapp deployment list-publishing-credentials --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --subscription ${{ secrets.AZURE_SUBSCRIPTION }} | Tee-Object -Variable PublishProfile
           echo $PublishProfile >>  %GITHUB_ENV%
 
       # deploy webapp to staging environment
@@ -238,7 +238,7 @@ jobs:
       # get publishing profile for webapp
       - name: Get Publish Profile
         run: |
-          az webapp deployment list-publishing-credentials --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --subscription ${{ env.AZURE_SUB }} | Tee-Object -Variable PublishProfile
+          az webapp deployment list-publishing-credentials --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --subscription ${{ secrets.AZURE_SUBSCRIPTION }} | Tee-Object -Variable PublishProfile
           echo $PublishProfile >>  %GITHUB_ENV%
 
       # deploy webapp to staging environment
@@ -282,7 +282,7 @@ jobs:
       # get publishing profile for webapp
       - name: Get Publish Profile
         run: |
-          az webapp deployment list-publishing-credentials --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --subscription ${{ env.AZURE_SUB }} | Tee-Object -Variable PublishProfile
+          az webapp deployment list-publishing-credentials --name ${{ env.AZURE_WEBAPP_NAME }} --resource-group ${{ env.AZURE_RESOURCE_GROUP }} --subscription ${{ secrets.AZURE_SUBSCRIPTION }} | Tee-Object -Variable PublishProfile
           echo $PublishProfile >>  %GITHUB_ENV%
 
       # deploy webapp to staging environment
