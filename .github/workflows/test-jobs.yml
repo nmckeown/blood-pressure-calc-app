@@ -69,7 +69,7 @@ jobs:
   # provision staging environment
   provision_infra:
     name: Provision Infrastruture
-    if: false
+    if: true
     #needs: owasp_dependency_check
     runs-on: ubuntu-latest
 
