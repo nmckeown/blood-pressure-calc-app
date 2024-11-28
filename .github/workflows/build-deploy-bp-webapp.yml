@@ -82,6 +82,10 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      # create service plan
+      - name: Create Service Plan
+        run: az appservice plan create --resource-group ${{ secrets.AZURE_RG }} --name ${{ secrets.AZURE_PLAN }} --sku P0V3 --is-linux
+
       # Deploy ARM template
       - name: Provision WebApp
         uses: azure/arm-deploy@v2
