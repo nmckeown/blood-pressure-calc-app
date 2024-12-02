@@ -133,7 +133,9 @@ jobs:
         run: |
           dotnet tool install -g dotnet-reportgenerator-globaltool
           reportgenerator -reports:"./BPCalcUnit/TestResults/*/coverage.cobertura.xml" -targetdir:"./BPCalcUnit/coverage-report" -reporttypes:Html
-          reportgenerator -reports:"./BPCalcAcceptance/TestResults/*.coverage" -targetdir:"./BPCalcAcceptance/coverage-report" -reporttypes:Html
+          pwd
+          ls -l ./BPCalcAcceptance/TestResults/
+          reportgenerator -reports:"./BPCalcAcceptance/TestResults/*/*.coverage" -targetdir:"./BPCalcAcceptance/coverage-report" -reporttypes:Html
 
       # upload reports
       - name: Upload Coverage Report
