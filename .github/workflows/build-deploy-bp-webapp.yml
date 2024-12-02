@@ -127,7 +127,7 @@ jobs:
 
       # run BDD acceptance tests
       - name: Run Acceptance Tests
-        run: dotnet test BPCalcAcceptance/BPCalcAcceptance.csproj --collect "Code Coverage"
+        run: dotnet test BPCalcAcceptance/BPCalcAcceptance.csproj --collect "XPlat Code Coverage"
 
       - name: Generate Reports
         run: |
@@ -135,6 +135,7 @@ jobs:
           reportgenerator -reports:"./BPCalcUnit/TestResults/*/coverage.cobertura.xml" -targetdir:"./BPCalcUnit/coverage-report" -reporttypes:Html
           pwd
           ls -l ./BPCalcAcceptance/TestResults/
+          reportgenerator -reports:"./BPCalcAcceptance/TestResults/*/coverage.cobertura.xml" -targetdir:"./BPCalcAcceptance/coverage-report" -reporttypes:Html
           reportgenerator -reports:"./BPCalcAcceptance/TestResults/*/*.coverage" -targetdir:"./BPCalcAcceptance/coverage-report" -reporttypes:Html
 
       # upload reports
