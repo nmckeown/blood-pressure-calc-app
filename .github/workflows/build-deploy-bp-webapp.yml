@@ -421,7 +421,7 @@ jobs:
 
   # canary deploy new feature
   blue_green_deploy:
-    name: Blue/Green Deploymment
+    name: Blue/Green Deployment
     if: true
     needs: canary_deploy
     runs-on: ubuntu-latest
