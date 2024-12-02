@@ -136,7 +136,6 @@ jobs:
           pwd
           ls -l ./BPCalcAcceptance/TestResults/
           reportgenerator -reports:"./BPCalcAcceptance/TestResults/*/coverage.cobertura.xml" -targetdir:"./BPCalcAcceptance/coverage-report" -reporttypes:Html
-          reportgenerator -reports:"./BPCalcAcceptance/TestResults/*/*.coverage" -targetdir:"./BPCalcAcceptance/coverage-report" -reporttypes:Html
 
       # upload reports
       - name: Upload Coverage Report
