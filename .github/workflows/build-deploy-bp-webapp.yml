@@ -123,8 +123,7 @@ jobs:
 
       # run unit tests
       - name: Run UNIT Tests
-        run: |
-          dotnet test BPCalcUnit/BPCalcUnitTests.csproj --collect "XPlat Code Coverage"
+        run: dotnet test BPCalcUnit/BPCalcUnitTests.csproj --collect "XPlat Code Coverage"
 
       # run BDD acceptance tests
       - name: Run Acceptance Tests
@@ -134,6 +133,7 @@ jobs:
         run: |
           dotnet tool install -g dotnet-reportgenerator-globaltool
           reportgenerator -reports:"./BPCalcUnit/TestResults/*/coverage.cobertura.xml" -targetdir:"./BPCalcUnit/coverage-report" -reporttypes:Html
+          reportgenerator -reports:"./BPCalcAcceptance/TestResults/*.coverage" -targetdir:"./BPCalcAcceptance/coverage-report" -reporttypes:Html
 
       # upload reports
       - name: Upload Coverage Report
@@ -152,7 +152,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: bdd-coverage
-          path: ./BPCalcAcceptance/TestResults/
+          #path: ./BPCalcAcceptance/TestResults/
+          path: ./BPCalcAcceptance/coverage-report/
 
       # publish artifact
       - name: dotnet Publish
