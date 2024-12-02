@@ -152,7 +152,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: bdd-coverage
-          path: /TestResults/bdd-acceptance-tests.txt
+          path: /TestResults/
           #path: ./BPCalcAcceptance/coverage-report/
 
       # publish artifact
