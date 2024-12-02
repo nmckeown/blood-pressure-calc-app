@@ -1,0 +1,44 @@
+Test run for /home/nmckeown/tud_devops_msc/Semester_2/CSD/CA1/code/blood-pressure-calc-app/BPCalcAcceptance/bin/Release/net6.0/BPCalcAcceptance.dll (.NETCoreApp,Version=v6.0)
+Microsoft (R) Test Execution Command Line Tool Version 17.0.3+cc7fb0593127e24f55ce016fb3ac85b5b2857fec
+Copyright (c) Microsoft Corporation.  All rights reserved.
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+Given I have entered a systolic pressure of 80
+-> done: BloodPressureSteps.GivenIHaveEnteredASystolicPressureOf(80) (0.0s)
+And I have entered a diastolic pressure of 50
+-> done: BloodPressureSteps.GivenIHaveEnteredADiastolicPressureOf(50) (0.0s)
+When I calculate the blood pressure
+-> done: BloodPressureSteps.WhenICalculateTheBloodPressure() (0.0s)
+Then the category should be "Low"
+-> done: BloodPressureSteps.ThenTheCategoryShouldBe("Low") (0.0s)
+
+Given I have entered a systolic pressure of 110
+-> done: BloodPressureSteps.GivenIHaveEnteredASystolicPressureOf(110) (0.0s)
+And I have entered a diastolic pressure of 70
+-> done: BloodPressureSteps.GivenIHaveEnteredADiastolicPressureOf(70) (0.0s)
+When I calculate the blood pressure
+-> done: BloodPressureSteps.WhenICalculateTheBloodPressure() (0.0s)
+Then the category should be "Ideal"
+-> done: BloodPressureSteps.ThenTheCategoryShouldBe("Ideal") (0.0s)
+
+Given I have entered a systolic pressure of 130
+-> done: BloodPressureSteps.GivenIHaveEnteredASystolicPressureOf(130) (0.0s)
+And I have entered a diastolic pressure of 85
+-> done: BloodPressureSteps.GivenIHaveEnteredADiastolicPressureOf(85) (0.0s)
+When I calculate the blood pressure
+-> done: BloodPressureSteps.WhenICalculateTheBloodPressure() (0.0s)
+Then the category should be "PreHigh"
+-> done: BloodPressureSteps.ThenTheCategoryShouldBe("PreHigh") (0.0s)
+
+Given I have entered a systolic pressure of 150
+-> done: BloodPressureSteps.GivenIHaveEnteredASystolicPressureOf(150) (0.0s)
+And I have entered a diastolic pressure of 95
+-> done: BloodPressureSteps.GivenIHaveEnteredADiastolicPressureOf(95) (0.0s)
+When I calculate the blood pressure
+-> done: BloodPressureSteps.WhenICalculateTheBloodPressure() (0.0s)
+Then the category should be "High"
+-> done: BloodPressureSteps.ThenTheCategoryShouldBe("High") (0.0s)
+
+
+Passed!  - Failed:     0, Passed:     4, Skipped:     0, Total:     4, Duration: 33 ms - /home/nmckeown/tud_devops_msc/Semester_2/CSD/CA1/code/blood-pressure-calc-app/BPCalcAcceptance/bin/Release/net6.0/BPCalcAcceptance.dll (net6.0)
