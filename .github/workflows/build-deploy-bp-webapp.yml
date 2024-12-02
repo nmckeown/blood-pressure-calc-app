@@ -127,7 +127,7 @@ jobs:
 
       # run BDD acceptance tests
       - name: Run Acceptance Tests
-        run: dotnet test BPCalcAcceptance/BPCalcAcceptance.csproj --no-build --configuration Release  > ./BPCalcAcceptance/TestResults/bdd-acceptance-tests.txt
+        run: dotnet test BPCalcAcceptance/BPCalcAcceptance.csproj --no-build --configuration Release  > ./TestResults/bdd-acceptance-tests.txt
         #run: dotnet test BPCalcAcceptance/BPCalcAcceptance.csproj --collect "XPlat Code Coverage"
 
       - name: Generate Coverage Report
@@ -152,7 +152,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: bdd-coverage
-          path: ./BPCalcAcceptance/TestResults/
+          path: /TestResults/bdd-acceptance-tests.txt
           #path: ./BPCalcAcceptance/coverage-report/
 
       # publish artifact
