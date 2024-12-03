@@ -13,13 +13,15 @@
         <form method="post" id="form1">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label asp-for="BP.Systolic" class="control-label"></label>
-                <input asp-for="BP.Systolic" class="form-control" id="BP_Systolic"/>
+                <label asp-for="BP.Systolic" class="control-label">
+                  <input asp-for="BP.Systolic" class="form-control" id="BP_Systolic"/>
+                </label>
                 <span asp-validation-for="BP.Systolic" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="BP.Diastolic" class="control-label"></label>
-                <input asp-for="BP.Diastolic" class="form-control" id="BP_Diastolic"/>
+                <label asp-for="BP.Diastolic" class="control-label">
+                  <input asp-for="BP.Diastolic" class="form-control" id="BP_Diastolic"/>
+                </label>
                 <span asp-validation-for="BP.Diastolic" class="text-danger"></span>
             </div>
             <div class="form-group">
