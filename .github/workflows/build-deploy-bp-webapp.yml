@@ -454,7 +454,7 @@ jobs:
   # destroy infra
   delete_infra:
     name: Teardown Infrastructure
-    if: true
+    if: false
     needs: blue_green_deploy
     runs-on: ubuntu-latest
     permissions:
